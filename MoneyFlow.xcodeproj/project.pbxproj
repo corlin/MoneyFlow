@@ -12,14 +12,13 @@
 		097BD25203A4D15DA932BAF2 /* LoanOCRParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1098F2D6CF3A5BA5C58BF4D /* LoanOCRParserTests.swift */; };
 		0CB57FD62613C117F083B7BA /* CreditCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68BC1AF1213334C24325C22A /* CreditCard.swift */; };
 		0FD4E9D105031625CD3DFB7E /* CreditCardForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F950500787322C91030B3E7C /* CreditCardForm.swift */; };
-		175DFCB543805A08A6A2BF81 /* DebtHealthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BB71633980A5313D769493 /* DebtHealthCard.swift */; };
 		1B228D33AB09E62F08920EDB /* LiabilitiesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7285206845FE1FD7E015AD18 /* LiabilitiesTab.swift */; };
+		1BBB8437C2BFAFAD3FF3F1A9 /* UpcomingPaymentsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D678D728982461AE3C2F398 /* UpcomingPaymentsCard.swift */; };
 		227CC344351F7BA8537A4EF9 /* Loan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6168CAFB5E98ACF255302976 /* Loan.swift */; };
 		2EFFE4CBAEBF7A493BA02EE4 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6981D869AAC2BB8CAA1C0EC /* Color+Theme.swift */; };
 		2F8E462B3F30DB1B031BC425 /* LoanAdjustmentEventSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2976F7F73941BFDB1F69AD57 /* LoanAdjustmentEventSheet.swift */; };
 		37495EDCD9333B7DB0FFC9DB /* MoneyFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287EBA5F3FDF7439D59B590C /* MoneyFlowUITests.swift */; };
 		3B2CD2BAC7B759D91D34BEE4 /* LoanDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC571A50F746802EB286991 /* LoanDetailView.swift */; };
-		4195B6E5C6819910D485B2F0 /* NetWorthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 154EF3DE741498D6E3C7B9BA /* NetWorthCard.swift */; };
 		4374BB973176485CB7DC2C41 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC61CAD9B1F984EE525E56C1 /* EmptyStateView.swift */; };
 		50D0BDEE649720D4C24E978D /* GoalFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDAECCD14D556EE9CE9122E /* GoalFormSheet.swift */; };
 		511FFF1F40930D4E6EE2B7D5 /* PersistenceRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 392C1A4FDFA74290C7A87CE6 /* PersistenceRecoveryView.swift */; };
@@ -58,7 +57,6 @@
 		D682378A40E3A9FFCED6BD89 /* PlanningScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7449381E34DC0BE137740A5 /* PlanningScenario.swift */; };
 		D81F492970A36B03CE6BBB96 /* FinancialResilienceHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF4A42949EE6CCD1BB898F9 /* FinancialResilienceHubView.swift */; };
 		D99EC6629D64E638CB5BD768 /* FinancialInputParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39CAA70886D499BAEB1BE18 /* FinancialInputParser.swift */; };
-		E2108BF9172AA259809111DC /* FinancialStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE0A0C49833DCF3A540CC90 /* FinancialStatusCard.swift */; };
 		E5D9FBEA2B760E8B1A41F031 /* AppMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6294614F51BA86268B782BC2 /* AppMotion.swift */; };
 		E882F5F0980A9A30D21B20D2 /* CashAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D006EBAE0C1DD4BA92BB8E29 /* CashAccount.swift */; };
 		F1F4432E3965E592300C6103 /* FinancialDataExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44AA8E1662F2105941AE3EEA /* FinancialDataExport.swift */; };
@@ -88,10 +86,8 @@
 		0817CA82FA37A84E5ACEE6DE /* CashFlowProjector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowProjector.swift; sourceTree = "<group>"; };
 		0EAA7218202D645F8DA8FD1F /* GoalCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCardView.swift; sourceTree = "<group>"; };
 		0F88453924D4CE7C1A773123 /* FinancialPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialPresentation.swift; sourceTree = "<group>"; };
-		154EF3DE741498D6E3C7B9BA /* NetWorthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCard.swift; sourceTree = "<group>"; };
 		155180D9E16BECCA6A34254E /* LoanOCRScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanOCRScannerService.swift; sourceTree = "<group>"; };
 		24C6E77243F7BEF053668FC1 /* MoneyFlowTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MoneyFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		25BB71633980A5313D769493 /* DebtHealthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtHealthCard.swift; sourceTree = "<group>"; };
 		287EBA5F3FDF7439D59B590C /* MoneyFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyFlowUITests.swift; sourceTree = "<group>"; };
 		2976F7F73941BFDB1F69AD57 /* LoanAdjustmentEventSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanAdjustmentEventSheet.swift; sourceTree = "<group>"; };
 		2BC6746E4CB0C59AE1FBE234 /* BatchLoanOCRImportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchLoanOCRImportSheet.swift; sourceTree = "<group>"; };
@@ -119,6 +115,7 @@
 		904D5DFB3F23A7069B62A22F /* CashFlowChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowChart.swift; sourceTree = "<group>"; };
 		9113CCEE226A81D0A6AF361F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		92068B5742CA987B0D04B7A8 /* RiskAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiskAnalyzer.swift; sourceTree = "<group>"; };
+		9D678D728982461AE3C2F398 /* UpcomingPaymentsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpcomingPaymentsCard.swift; sourceTree = "<group>"; };
 		A12246B3066447E769BBE68B /* MultiGoalEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiGoalEngine.swift; sourceTree = "<group>"; };
 		A3FA3795F15896CB986517B1 /* OverviewTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewTab.swift; sourceTree = "<group>"; };
 		A6A618F039223FEFBAB11EC2 /* MoneyFlowUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MoneyFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -139,7 +136,6 @@
 		EBEB2B76BDD67F49E7BF5675 /* DemoDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoDataService.swift; sourceTree = "<group>"; };
 		EC61CAD9B1F984EE525E56C1 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		ECC571A50F746802EB286991 /* LoanDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanDetailView.swift; sourceTree = "<group>"; };
-		EDE0A0C49833DCF3A540CC90 /* FinancialStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialStatusCard.swift; sourceTree = "<group>"; };
 		F1098F2D6CF3A5BA5C58BF4D /* LoanOCRParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanOCRParserTests.swift; sourceTree = "<group>"; };
 		F40DFCDA1EAAABEBFCF8CD34 /* RepaymentCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepaymentCalculator.swift; sourceTree = "<group>"; };
 		F950500787322C91030B3E7C /* CreditCardForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardForm.swift; sourceTree = "<group>"; };
@@ -267,11 +263,9 @@
 			isa = PBXGroup;
 			children = (
 				904D5DFB3F23A7069B62A22F /* CashFlowChart.swift */,
-				25BB71633980A5313D769493 /* DebtHealthCard.swift */,
 				2CF4A42949EE6CCD1BB898F9 /* FinancialResilienceHubView.swift */,
-				EDE0A0C49833DCF3A540CC90 /* FinancialStatusCard.swift */,
-				154EF3DE741498D6E3C7B9BA /* NetWorthCard.swift */,
 				A3FA3795F15896CB986517B1 /* OverviewTab.swift */,
+				9D678D728982461AE3C2F398 /* UpcomingPaymentsCard.swift */,
 			);
 			path = Overview;
 			sourceTree = "<group>";
@@ -485,7 +479,6 @@
 				7B2A645AA4781B45BD834A2C /* CreditCardRow.swift in Sources */,
 				BCAB3B5F8B385BB031F9FEAD /* CurrencyText.swift in Sources */,
 				AAD1F0D02531C65FFD435E89 /* Date+Helpers.swift in Sources */,
-				175DFCB543805A08A6A2BF81 /* DebtHealthCard.swift in Sources */,
 				74E232E42A7EAEC3A300E2B2 /* Decimal+Helpers.swift in Sources */,
 				FB653EDA20683CDDFB5CD8EE /* DemoDataService.swift in Sources */,
 				84417F2FC442C45D185C4891 /* DynamicCashFlowSandboxView.swift in Sources */,
@@ -495,7 +488,6 @@
 				D99EC6629D64E638CB5BD768 /* FinancialInputParser.swift in Sources */,
 				6CCE37C81C0A4A0041A1C105 /* FinancialPresentation.swift in Sources */,
 				D81F492970A36B03CE6BBB96 /* FinancialResilienceHubView.swift in Sources */,
-				E2108BF9172AA259809111DC /* FinancialStatusCard.swift in Sources */,
 				58F628E461864B094B9AC427 /* GoalCardView.swift in Sources */,
 				50D0BDEE649720D4C24E978D /* GoalFormSheet.swift in Sources */,
 				C028A81849DB22063F6256DA /* GoalListView.swift in Sources */,
@@ -510,7 +502,6 @@
 				AA083839B21AFB2A35EBA34E /* LoanRow.swift in Sources */,
 				847E7C2F877977ED0B9840E6 /* MoneyFlowApp.swift in Sources */,
 				00E5AA23CADF40298A561A20 /* MultiGoalEngine.swift in Sources */,
-				4195B6E5C6819910D485B2F0 /* NetWorthCard.swift in Sources */,
 				BA30AD475DCA86CAFC3FCF51 /* OverviewTab.swift in Sources */,
 				AD62C936461A475A93E73E02 /* PersistenceRecoveryCoordinator.swift in Sources */,
 				511FFF1F40930D4E6EE2B7D5 /* PersistenceRecoveryView.swift in Sources */,
@@ -520,6 +511,7 @@
 				572C7B72750F71C86BAEF19F /* RiskAnalyzer.swift in Sources */,
 				A3C2CEC117183FD4A5CFB5C7 /* SettingsView.swift in Sources */,
 				AE7C217CE4CD4F17E4601C6B /* UndoBanner.swift in Sources */,
+				1BBB8437C2BFAFAD3FF3F1A9 /* UpcomingPaymentsCard.swift in Sources */,
 				B8F36E466F9D4EA8104693F1 /* UserSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

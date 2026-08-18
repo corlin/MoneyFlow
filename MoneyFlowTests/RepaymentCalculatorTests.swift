@@ -242,49 +242,6 @@ final class RepaymentCalculatorTests: XCTestCase {
         XCTAssertThrowsError(try FinancialDataExport.make(accounts: [account], loans: [], cards: []))
     }
 
-    func testLiquidityBufferFindsCoverageHorizonAndFirstShortfall() {
-        let items = [
-            projection(month: 8, endingCash: 8_000),
-            projection(month: 9, endingCash: 2_000),
-            projection(month: 10, endingCash: -500, warning: true)
-        ]
-
-        let summary = LiquidityBufferSummary.make(items: items, monthlyIncome: 0)
-
-        XCTAssertEqual(summary.coveredMonths, 2)
-        XCTAssertEqual(summary.horizonMonths, 3)
-        XCTAssertEqual(summary.firstShortfall?.endingCash, -500)
-        XCTAssertEqual(summary.minimumBalance, -500)
-        XCTAssertFalse(summary.hasMonthlyIncomeAssumption)
-
-        let safe = LiquidityBufferSummary.make(items: Array(items.prefix(2)), monthlyIncome: 5_000)
-        XCTAssertEqual(safe.coveredMonths, 2)
-        XCTAssertNil(safe.firstShortfall)
-        XCTAssertTrue(safe.hasMonthlyIncomeAssumption)
-    }
-
-    func testDebtProgressUsesRecordedPrincipalAndScheduledPrincipalReduction() {
-        let loan = Loan(
-            name: "等额本金贷款",
-            totalAmount: 1_200,
-            remainingPrincipal: 1_000,
-            annualRate: 0,
-            repaymentMethod: .equalPrincipal,
-            totalPeriods: 12,
-            paidPeriods: 2,
-            monthlyPayment: 100,
-            paymentDayOfMonth: 10
-        )
-        let card = CreditCard(name: "信用卡", creditLimit: 5_000, currentBalance: 200)
-
-        let summary = DebtProgressSummary.make(loans: [loan], creditCards: [card], horizonMonths: 6)
-
-        XCTAssertEqual(summary.currentDebt, 1_200, accuracy: 0.001)
-        XCTAssertEqual(summary.projectedPrincipalReduction, 800, accuracy: 0.001)
-        XCTAssertEqual(summary.projectedRemainingDebt, 400, accuracy: 0.001)
-        XCTAssertEqual(summary.remainingRatio, 1.0 / 3.0, accuracy: 0.001)
-    }
-
     func testUpcomingPaymentSummaryTotalsThirtyDaysAndKeepsThreeNearestItems() {
         let reminders = (1...4).map { index in
             UpcomingPaymentReminder(
