@@ -9,30 +9,44 @@ struct SettingsView: View {
     @Query private var accounts: [CashAccount]
     @Query private var loans: [Loan]
     @Query private var creditCards: [CreditCard]
+    @Query private var goals: [FinancialGoal]
 
     @State private var monthlyIncomeText = ""
+    @State private var monthlyLivingExpenseText = ""
     @State private var showingResetAlert = false
-    @State private var showingDemoAlert = false
+    @State private var selectedDemoPersona: DemoPersona? = nil
     @State private var errorMessage: String?
     @State private var saveSucceeded = false
 
     private var export: FinancialDataExport? {
-        try? FinancialDataExport.make(accounts: accounts, loans: loans, cards: creditCards)
+        try? FinancialDataExport.make(accounts: accounts, loans: loans, cards: creditCards, goals: goals)
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("预测假设") {
+                Section("CFP 现金流与生活基准") {
                     HStack {
-                        Text("每月预计收入")
+                        Text("每月预计净收入")
                         Spacer()
                         TextField("0.00", text: $monthlyIncomeText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .accessibilityLabel("每月预计收入")
                     }
-                    Label(ProjectionAssumptions.default.disclosureText, systemImage: "info.circle")
+
+                    HStack {
+                        Text("每月刚性生活支出基准")
+                        Spacer()
+                        TextField("0.00", text: $monthlyLivingExpenseText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .accessibilityLabel("每月生活支出基准")
+                    }
+
+                    Stepper("目标应急缓冲：\(settings.emergencyFundMonthsTarget) 个月", value: $settings.emergencyFundMonthsTarget, in: 1...12)
+
+                    Text("用于计算自由结余、应急储备水位与 DSR 偿债承载力。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -53,14 +67,14 @@ struct SettingsView: View {
                             step: 0.1
                         )
                         .tint(.appHealthyDebt)
-                        Text("低于该基准的贷款显示为“低于基准”，其他贷款显示为“需关注”。这只是你的自定义分类，不构成财务建议。")
+                        Text("低于该基准的贷款显示为“低于基准”，其他贷款显示为“需关注”。")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                 }
 
-                Section("现金提醒") {
+                Section("现金预警") {
                     VStack(alignment: .leading, spacing: 8) {
                         LabeledContent("单月支出警戒线") {
                             Text("\(Int(settings.cashFlowWarningRatio * 100))%")
@@ -80,6 +94,36 @@ struct SettingsView: View {
                     Stepper("提前 \(settings.reminderDaysBefore) 天提醒", value: $settings.reminderDaysBefore, in: 1...15)
                 }
 
+                Section("专业演示画像切换") {
+                    Button {
+                        selectedDemoPersona = .debtRelief
+                    } label: {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Label("画像 1：负债突围与安全筑底", systemImage: "bolt.shield.fill")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text("高 DSR、7.2% 装修高息贷、体验雪崩法加速省息与建立应急金")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 2)
+                    }
+
+                    Button {
+                        selectedDemoPersona = .multiGoalGrowth
+                    } label: {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Label("画像 2：多目标稳健积累", systemImage: "chart.line.uptrend.xyaxis.circle.fill")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text("充裕结余、公积金贷、3 大梯队目标（应急金/车/首付）动态灌溉")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+
                 Section {
                     if let export {
                         ShareLink(item: export, preview: SharePreview("MoneyFlow 本地备份", image: Image(systemName: "doc.badge.arrow.up"))) {
@@ -90,24 +134,18 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    Button {
-                        showingDemoAlert = true
-                    } label: {
-                        Label("用示例数据替换当前记录", systemImage: "wand.and.stars")
-                    }
-
                     Button("清空所有数据", systemImage: "trash", role: .destructive) {
                         showingResetAlert = true
                     }
                 } header: {
-                    Text("数据与恢复")
+                    Text("数据管理与备份")
                 } footer: {
-                    Text("建议在清空或替换前先导出备份。导出的文件由你决定保存或分享到哪里。")
+                    Text("建议在清空或替换前先导出备份。所有数据仅保存在本地设备。")
                 }
 
                 Section("关于") {
-                    LabeledContent("版本", value: "1.0.0 (Build 1)")
-                    LabeledContent("核心理念", value: "清晰偿债 · 操作可恢复")
+                    LabeledContent("版本", value: "2.0.0 (CFP Dynamic Suite)")
+                    LabeledContent("规划模型", value: "GBWM 目标导向 · 瀑布流沙盘")
                 }
 
                 if let errorMessage {
@@ -130,18 +168,27 @@ struct SettingsView: View {
             }
             .onAppear {
                 monthlyIncomeText = settings.monthlyEstimatedIncome.formatted(.number.precision(.fractionLength(0...2)))
+                monthlyLivingExpenseText = settings.monthlyLivingExpense.formatted(.number.precision(.fractionLength(0...2)))
             }
-            .alert("替换为示例数据？", isPresented: $showingDemoAlert) {
-                Button("替换", role: .destructive, action: loadDemoData)
-                Button("取消", role: .cancel) {}
+            .confirmationDialog(
+                "载入演示画像？",
+                isPresented: Binding(get: { selectedDemoPersona != nil }, set: { if !$0 { selectedDemoPersona = nil } }),
+                titleVisibility: .visible
+            ) {
+                if let persona = selectedDemoPersona {
+                    Button("确认载入：\(persona.shortTitle)", role: .destructive) {
+                        loadDemoPersona(persona)
+                    }
+                }
+                Button("取消", role: .cancel) { selectedDemoPersona = nil }
             } message: {
-                Text("当前资产、贷款和信用卡记录会被示例数据替换。请先导出备份。")
+                Text("当前所有数据将被该画像替换。请确认是否继续。")
             }
             .alert("清空所有数据？", isPresented: $showingResetAlert) {
                 Button("清空", role: .destructive, action: clearAllData)
                 Button("取消", role: .cancel) {}
             } message: {
-                Text("资产、贷款和信用卡记录将被删除。请先导出备份。")
+                Text("资产、贷款、信用卡与规划目标记录将被删除。请先导出备份。")
             }
             .sensoryFeedback(.success, trigger: saveSucceeded)
         }
@@ -152,7 +199,15 @@ struct SettingsView: View {
             errorMessage = "请输入有效的每月预计收入。"
             return
         }
+
+        let livingExpense = FinancialInputParser.number(from: monthlyLivingExpenseText) ?? 0.0
+        guard livingExpense >= 0 else {
+            errorMessage = "请输入有效的每月刚性生活支出。"
+            return
+        }
+
         settings.monthlyEstimatedIncome = income
+        settings.monthlyLivingExpense = livingExpense
         settings.updatedAt = Date()
         do {
             try modelContext.save()
@@ -169,6 +224,7 @@ struct SettingsView: View {
             for account in accounts { modelContext.delete(account) }
             for loan in loans { modelContext.delete(loan) }
             for card in creditCards { modelContext.delete(card) }
+            for goal in goals { modelContext.delete(goal) }
             try modelContext.save()
             saveSucceeded.toggle()
         } catch {
@@ -177,12 +233,13 @@ struct SettingsView: View {
         }
     }
 
-    private func loadDemoData() {
+    private func loadDemoPersona(_ persona: DemoPersona) {
         do {
-            try DemoDataService.load(into: modelContext, replacingExisting: true)
+            try DemoDataService.load(into: modelContext, replacingExisting: true, persona: persona)
             saveSucceeded.toggle()
+            dismiss()
         } catch {
-            errorMessage = "示例数据载入失败：\(error.localizedDescription)"
+            errorMessage = "演示画像载入失败：\(error.localizedDescription)"
         }
     }
 }

@@ -111,15 +111,19 @@ struct LoanDetailView: View {
                 Text("\(Int(loan.progress * 100))%")
                     .font(.subheadline.bold())
                     .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .animation(AppMotion.animation(for: .momentum, reduceMotion: reduceMotion), value: loan.progress)
             }
             ProgressView(value: loan.progress)
                 .tint(loan.annualRate <= rateThreshold ? Color.appHealthyDebt : Color.appWarningDebt)
+                .animation(AppMotion.animation(for: .momentum, reduceMotion: reduceMotion), value: loan.progress)
                 .accessibilityLabel("还款进度")
                 .accessibilityValue("已还 \(loan.paidPeriods) 期，共 \(loan.totalPeriods) 期")
 
             Text("已还 \(loan.paidPeriods) 期，剩余 \(loan.remainingPeriods) 期")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .contentTransition(.numericText())
 
             if loan.remainingPeriods > 0 {
                 Button(action: completePayment) {
@@ -127,7 +131,7 @@ struct LoanDetailView: View {
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.96, pressedOpacity: 0.85))
                 .tint(.appPrimary)
             }
         }
@@ -147,10 +151,11 @@ struct LoanDetailView: View {
                 }
                 Spacer()
                 Button(showingFullSchedule ? "收起" : "查看全部") {
-                    withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.35, dampingFraction: 1)) {
+                    AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
                         showingFullSchedule.toggle()
                     }
                 }
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.94, pressedOpacity: 0.75))
                 .font(.subheadline)
             }
 
@@ -174,7 +179,12 @@ struct LoanDetailView: View {
     private func metric(_ title: String, _ value: String, _ color: Color) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(title).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.headline).fontWeight(.bold).monospacedDigit().foregroundStyle(color)
+            Text(value)
+                .font(.headline)
+                .fontWeight(.bold)
+                .monospacedDigit()
+                .foregroundStyle(color)
+                .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -196,21 +206,25 @@ struct LoanDetailView: View {
         let previousPrincipal = loan.remainingPrincipal
         let previousInterest = loan.totalInterestPaid
 
-        loan.paidPeriods += 1
-        if let period = summary.schedule.first(where: { $0.period == loan.paidPeriods }) {
-            loan.remainingPrincipal = period.remainingPrincipal
-            loan.totalInterestPaid += period.interest
+        AppMotion.perform(level: .momentum, reduceMotion: reduceMotion) {
+            loan.paidPeriods += 1
+            if let period = summary.schedule.first(where: { $0.period == loan.paidPeriods }) {
+                loan.remainingPrincipal = period.remainingPrincipal
+                loan.totalInterestPaid += period.interest
+            }
+            loan.updatedAt = Date()
         }
-        loan.updatedAt = Date()
 
         do {
             try modelContext.save()
             paymentFeedback.toggle()
             let action = UndoAction(message: "已记录第 \(loan.paidPeriods) 期还款") {
-                loan.paidPeriods = previousPaid
-                loan.remainingPrincipal = previousPrincipal
-                loan.totalInterestPaid = previousInterest
-                loan.updatedAt = Date()
+                AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
+                    loan.paidPeriods = previousPaid
+                    loan.remainingPrincipal = previousPrincipal
+                    loan.totalInterestPaid = previousInterest
+                    loan.updatedAt = Date()
+                }
                 do {
                     try modelContext.save()
                 } catch {
@@ -218,7 +232,7 @@ struct LoanDetailView: View {
                     errorMessage = "无法撤销还款记录：\(error.localizedDescription)"
                 }
             }
-            withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.35, dampingFraction: 1)) {
+            AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
                 undoAction = action
             }
             Task { @MainActor in
@@ -232,13 +246,14 @@ struct LoanDetailView: View {
     }
 
     private func dismissUndo() {
-        withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.3, dampingFraction: 1)) {
+        AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
             undoAction = nil
         }
     }
 }
 
 private struct ScheduleRowView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let item: RepaymentScheduleItem
     let isCurrent: Bool
     let isPaid: Bool
@@ -246,7 +261,7 @@ private struct ScheduleRowView: View {
     @State private var expanded = false
 
     var body: some View {
-        DisclosureGroup(isExpanded: $expanded) {
+        DisclosureGroup(isExpanded: $expanded.animation(AppMotion.animation(for: .spatial, reduceMotion: reduceMotion))) {
             VStack(spacing: 8) {
                 LabeledContent("偿还本金", value: item.principal.formattedCurrency)
                 LabeledContent("支付利息", value: item.interest.formattedCurrency)
@@ -259,6 +274,7 @@ private struct ScheduleRowView: View {
             HStack(spacing: 10) {
                 Image(systemName: isPaid ? "checkmark.circle.fill" : (isCurrent ? "circle.inset.filled" : "circle"))
                     .foregroundStyle(isPaid ? Color.appAsset : (isCurrent ? Color.appPrimary : Color.secondary))
+                    .contentTransition(.symbolEffect(.replace))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("第 \(item.period) 期")

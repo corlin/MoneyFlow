@@ -186,7 +186,7 @@ final class RepaymentCalculatorTests: XCTestCase {
 
     @MainActor
     func testDemoDataServiceCanReplaceWithoutDuplicatingRecords() throws {
-        let schema = Schema([CashAccount.self, Loan.self, CreditCard.self, UserSettings.self])
+        let schema = Schema([CashAccount.self, Loan.self, CreditCard.self, UserSettings.self, FinancialGoal.self])
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: schema, configurations: [configuration])
         let context = container.mainContext

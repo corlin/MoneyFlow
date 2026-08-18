@@ -12,7 +12,12 @@ struct FinancialDataExport: Transferable {
         .suggestedFileName("MoneyFlow-Backup.json")
     }
 
-    static func make(accounts: [CashAccount], loans: [Loan], cards: [CreditCard]) throws -> FinancialDataExport {
+    static func make(
+        accounts: [CashAccount],
+        loans: [Loan],
+        cards: [CreditCard],
+        goals: [FinancialGoal] = []
+    ) throws -> FinancialDataExport {
         let snapshot = Snapshot(
             exportedAt: Date(),
             accounts: accounts.map { .init(name: $0.name, balance: $0.balance, icon: $0.icon, note: $0.note) },
@@ -32,6 +37,17 @@ struct FinancialDataExport: Transferable {
             },
             cards: cards.map {
                 .init(name: $0.name, creditLimit: $0.creditLimit, currentBalance: $0.currentBalance, billingDay: $0.billingDay, dueDay: $0.dueDay)
+            },
+            goals: goals.map {
+                .init(
+                    name: $0.name,
+                    category: $0.category.rawValue,
+                    targetAmount: $0.targetAmount,
+                    currentEarmarkedAmount: $0.currentEarmarkedAmount,
+                    priority: $0.priority.rawValue,
+                    targetDate: $0.targetDate,
+                    note: $0.note
+                )
             }
         )
         let encoder = JSONEncoder()
@@ -45,6 +61,7 @@ struct FinancialDataExport: Transferable {
         let accounts: [Account]
         let loans: [LoanSnapshot]
         let cards: [Card]
+        let goals: [GoalSnapshot]
     }
 
     private struct Account: Codable {
@@ -73,5 +90,15 @@ struct FinancialDataExport: Transferable {
         let currentBalance: Double
         let billingDay: Int
         let dueDay: Int
+    }
+
+    private struct GoalSnapshot: Codable {
+        let name: String
+        let category: String
+        let targetAmount: Double
+        let currentEarmarkedAmount: Double
+        let priority: String
+        let targetDate: Date?
+        let note: String
     }
 }

@@ -5,6 +5,7 @@ struct CashFlowChart: View {
     let items: [MonthlyCashFlowItem]
     let assumptions: ProjectionAssumptions
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedItem: MonthlyCashFlowItem?
     @State private var showsAssumptions = false
@@ -22,7 +23,10 @@ struct CashFlowChart: View {
                     .foregroundStyle(.secondary)
             }
 
-            if let selected = displayedItem { selectedMonthCard(selected) }
+            if let selected = displayedItem {
+                selectedMonthCard(selected)
+                    .animation(AppMotion.animation(for: .interactive, reduceMotion: reduceMotion), value: selected.id)
+            }
 
             Chart {
                 RuleMark(y: .value("零余额", 0))
@@ -60,6 +64,7 @@ struct CashFlowChart: View {
                     .symbolSize(60)
                 }
             }
+            .animation(AppMotion.animation(for: .interactive, reduceMotion: reduceMotion), value: displayedItem?.id)
             .frame(height: dynamicTypeSize.isAccessibilitySize ? 260 : 210)
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
@@ -100,7 +105,11 @@ struct CashFlowChart: View {
                                           let nearest = items.min(by: {
                                               abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date))
                                           }) else { return }
-                                    if selectedItem?.id != nearest.id { selectedItem = nearest }
+                                    if selectedItem?.id != nearest.id {
+                                        AppMotion.perform(level: .interactive, reduceMotion: reduceMotion) {
+                                            selectedItem = nearest
+                                        }
+                                    }
                                 }
                         )
                 }
@@ -108,7 +117,7 @@ struct CashFlowChart: View {
             .accessibilityElement()
             .accessibilityLabel(CashFlowChartSummary.text(for: items))
 
-            DisclosureGroup("预测假设", isExpanded: $showsAssumptions) {
+            DisclosureGroup("预测假设", isExpanded: $showsAssumptions.animation(AppMotion.animation(for: .spatial, reduceMotion: reduceMotion))) {
                 Text(assumptions.disclosureText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -162,7 +171,11 @@ struct CashFlowChart: View {
     private func metric(_ title: String, _ value: String, _ color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title).font(.caption2).foregroundStyle(.secondary)
-            Text(value).font(.subheadline.weight(.semibold)).monospacedDigit().foregroundStyle(color)
+            Text(value)
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(color)
+                .contentTransition(.numericText())
         }
     }
 }

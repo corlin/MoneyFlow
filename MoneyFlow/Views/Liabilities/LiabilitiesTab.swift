@@ -68,11 +68,13 @@ struct LiabilitiesTab: View {
                         if !creditCards.isEmpty {
                             Section("信用卡 · \(creditCards.count)") {
                                 ForEach(creditCards) { card in
-                                    CreditCardRow(card: card)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture { creditCardToEdit = card }
-                                        .accessibilityAddTraits(.isButton)
-                                        .accessibilityHint("打开并编辑信用卡")
+                                    Button {
+                                        creditCardToEdit = card
+                                    } label: {
+                                        CreditCardRow(card: card)
+                                    }
+                                    .buttonStyle(AppCardButtonStyle())
+                                    .accessibilityHint("打开并编辑信用卡")
                                 }
                                 .onDelete(perform: deleteCards)
                             }
@@ -89,6 +91,7 @@ struct LiabilitiesTab: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.92, pressedOpacity: 0.75))
                     .accessibilityLabel("添加负债")
                 }
             }
@@ -143,7 +146,7 @@ struct LiabilitiesTab: View {
                     errorMessage = "无法撤销删除：\(error.localizedDescription)"
                 }
             }
-            withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.35, dampingFraction: 1)) {
+            AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
                 undoAction = action
             }
             Task { @MainActor in
@@ -157,7 +160,7 @@ struct LiabilitiesTab: View {
     }
 
     private func dismissUndo() {
-        withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.3, dampingFraction: 1)) {
+        AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
             undoAction = nil
         }
     }

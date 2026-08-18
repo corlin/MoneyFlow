@@ -5,6 +5,7 @@ struct AssetsTab: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Query(sort: \CashAccount.createdAt, order: .reverse) private var accounts: [CashAccount]
+    @Query private var goals: [FinancialGoal]
 
     @State private var showingAddSheet = false
     @State private var accountToEdit: CashAccount?
@@ -12,6 +13,8 @@ struct AssetsTab: View {
     @State private var errorMessage: String?
 
     private var totalBalance: Double { accounts.reduce(0) { $0 + $1.balance } }
+    private var totalEarmarked: Double { goals.reduce(0) { $0 + $1.currentEarmarkedAmount } }
+    private var freeCash: Double { max(0.0, totalBalance - totalEarmarked) }
 
     var body: some View {
         NavigationStack {
@@ -26,17 +29,45 @@ struct AssetsTab: View {
                 } else {
                     List {
                         Section {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("可用现金资产")
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("现金流动资产")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
+
                                 CurrencyText(
                                     amount: totalBalance,
                                     font: .system(.largeTitle, design: .rounded),
                                     weight: .bold,
                                     color: .appAsset
                                 )
-                                Text("\(accounts.count) 个账户")
+
+                                if totalEarmarked > 0 {
+                                    Divider()
+
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("未锁定自由现金")
+                                                .font(.caption2)
+                                                .foregroundStyle(.secondary)
+                                            Text(freeCash.formattedCurrency())
+                                                .font(.subheadline.bold())
+                                                .foregroundStyle(.blue)
+                                        }
+
+                                        Spacer()
+
+                                        VStack(alignment: .trailing, spacing: 2) {
+                                            Text("已锁定规划目标")
+                                                .font(.caption2)
+                                                .foregroundStyle(.secondary)
+                                            Text(totalEarmarked.formattedCurrency())
+                                                .font(.subheadline.bold())
+                                                .foregroundStyle(.purple)
+                                        }
+                                    }
+                                }
+
+                                Text("\(accounts.count) 个账户 · \(goals.count) 个规划目标")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -45,13 +76,15 @@ struct AssetsTab: View {
                         }
                         .listRowBackground(Color.appCardBackground)
 
-                        Section("账户") {
+                        Section("账户列表") {
                             ForEach(accounts) { account in
-                                CashAccountRow(account: account)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture { accountToEdit = account }
-                                    .accessibilityAddTraits(.isButton)
-                                    .accessibilityHint("打开并编辑账户")
+                                Button {
+                                    accountToEdit = account
+                                } label: {
+                                    CashAccountRow(account: account)
+                                }
+                                .buttonStyle(AppCardButtonStyle())
+                                .accessibilityHint("打开并编辑账户")
                             }
                             .onDelete(perform: deleteAccounts)
                         }
@@ -62,6 +95,7 @@ struct AssetsTab: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingAddSheet = true } label: { Image(systemName: "plus") }
+                        .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.92, pressedOpacity: 0.75))
                         .accessibilityLabel("添加资产")
                 }
             }
@@ -103,7 +137,7 @@ struct AssetsTab: View {
 
     private func presentUndo(message: String, perform: @escaping () -> Void) {
         let action = UndoAction(message: message, perform: perform)
-        withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.35, dampingFraction: 1)) {
+        AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
             undoAction = action
         }
         Task { @MainActor in
@@ -113,7 +147,7 @@ struct AssetsTab: View {
     }
 
     private func dismissUndo() {
-        withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.3, dampingFraction: 1)) {
+        AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
             undoAction = nil
         }
     }

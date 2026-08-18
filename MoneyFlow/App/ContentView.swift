@@ -7,21 +7,27 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             OverviewTab()
                 .tabItem {
-                    Label("概览", systemImage: "chart.pie.fill")
+                    Label("概览", systemImage: "square.grid.2x2.fill")
                 }
                 .tag(0)
+
+            PlanningTab()
+                .tabItem {
+                    Label("规划", systemImage: "chart.xyaxis.line")
+                }
+                .tag(1)
 
             AssetsTab()
                 .tabItem {
                     Label("资产", systemImage: "banknote.fill")
                 }
-                .tag(1)
+                .tag(2)
 
             LiabilitiesTab()
                 .tabItem {
-                    Label("负债", systemImage: "doc.plaintext.fill")
+                    Label("负债", systemImage: "creditcard.fill")
                 }
-                .tag(2)
+                .tag(3)
         }
         .tint(Color.appPrimary)
     }

@@ -7,6 +7,7 @@ struct OverviewTab: View {
     @Query private var accounts: [CashAccount]
     @Query private var loans: [Loan]
     @Query private var creditCards: [CreditCard]
+    @Query private var goals: [FinancialGoal]
     @Query private var userSettingsList: [UserSettings]
 
     @State private var settingsToEdit: UserSettings?
@@ -14,6 +15,7 @@ struct OverviewTab: View {
     @State private var showingAddAssetSheet = false
     @State private var showingAddLoanSheet = false
     @State private var showingAddCreditCardSheet = false
+    @State private var showingAddGoalSheet = false
     @State private var loanToOpen: Loan?
     @State private var creditCardToEdit: CreditCard?
     @State private var demoError: String?
@@ -23,26 +25,36 @@ struct OverviewTab: View {
     private var rateThreshold: Double { settings?.rateThreshold ?? 0.05 }
     private var warningRatio: Double { settings?.cashFlowWarningRatio ?? 0.70 }
     private var monthlyIncome: Double { settings?.monthlyEstimatedIncome ?? 0 }
+    private var monthlyLivingExpense: Double { settings?.monthlyLivingExpense ?? 0 }
+    private var emergencyTargetMonths: Int { settings?.emergencyFundMonthsTarget ?? 3 }
     private var totalCash: Double { accounts.reduce(0) { $0 + $1.balance } }
-    private var hasAnyData: Bool { !accounts.isEmpty || !loans.isEmpty || !creditCards.isEmpty }
+    private var hasAnyData: Bool { !accounts.isEmpty || !loans.isEmpty || !creditCards.isEmpty || !goals.isEmpty }
 
     private var debtAnalysis: DebtHealthAnalysis {
         RiskAnalyzer.analyze(
             cashAccounts: accounts,
             loans: loans,
             creditCards: creditCards,
-            rateThreshold: rateThreshold
+            goals: goals,
+            rateThreshold: rateThreshold,
+            monthlyIncome: monthlyIncome,
+            monthlyLivingExpense: monthlyLivingExpense,
+            emergencyTargetMonths: emergencyTargetMonths
         )
     }
 
-    private var projections: [MonthlyCashFlowItem] {
-        CashFlowProjector.projectCashFlow(
+    private var projectionResult: CashFlowProjectionResult {
+        CashFlowProjector.projectAdvancedCashFlow(
             initialCash: totalCash,
             loans: loans,
             creditCards: creditCards,
+            goals: goals,
+            monthlyIncome: monthlyIncome,
+            monthlyLivingExpense: monthlyLivingExpense,
             warningRatio: warningRatio,
             monthsCount: 12,
-            monthlyIncome: monthlyIncome
+            assumptions: .default,
+            scenario: .baseline
         )
     }
 
@@ -55,7 +67,7 @@ struct OverviewTab: View {
     }
 
     private var liquiditySummary: LiquidityBufferSummary {
-        LiquidityBufferSummary.make(items: projections, monthlyIncome: monthlyIncome)
+        LiquidityBufferSummary.make(items: projectionResult.baselineItems, monthlyIncome: monthlyIncome)
     }
 
     private var debtProgressSummary: DebtProgressSummary {
@@ -83,6 +95,7 @@ struct OverviewTab: View {
                     Button(action: prepareSettingsAndShow) {
                         Image(systemName: "gearshape")
                     }
+                    .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.92, pressedOpacity: 0.75))
                     .accessibilityLabel("设置")
                 }
             }
@@ -90,6 +103,7 @@ struct OverviewTab: View {
                 Button("添加资产", systemImage: "banknote") { showingAddAssetSheet = true }
                 Button("添加贷款", systemImage: "house") { showingAddLoanSheet = true }
                 Button("添加信用卡", systemImage: "creditcard") { showingAddCreditCardSheet = true }
+                Button("添加规划目标", systemImage: "target") { showingAddGoalSheet = true }
                 Button("取消", role: .cancel) {}
             } message: {
                 Text("选择最方便的一项开始，其余内容以后随时可以补充。")
@@ -98,6 +112,14 @@ struct OverviewTab: View {
             .sheet(isPresented: $showingAddAssetSheet) { CashAccountForm() }
             .sheet(isPresented: $showingAddLoanSheet) { LoanForm() }
             .sheet(isPresented: $showingAddCreditCardSheet) { CreditCardForm() }
+            .sheet(isPresented: $showingAddGoalSheet) {
+                GoalFormSheet(
+                    goalToEdit: nil,
+                    totalCash: totalCash,
+                    totalExistingEarmarked: goals.reduce(0) { $0 + $1.currentEarmarkedAmount },
+                    activeLoans: loans.filter { $0.remainingPrincipal > 0 }
+                )
+            }
             .sheet(item: $loanToOpen) { loan in
                 NavigationStack { LoanDetailView(loan: loan, rateThreshold: rateThreshold) }
             }
@@ -116,8 +138,18 @@ struct OverviewTab: View {
 
     private var populatedOverview: some View {
         LazyVStack(spacing: 16) {
+            // 1. CFP 智能体检与建议卡
+            CFPInsightsCard(analysis: debtAnalysis) {
+                // 跳转到规划 tab (由系统导航或用户切换)
+            }
+
+            // 2. 偿债缓冲卡
             LiquidityBufferCard(summary: liquiditySummary)
-            CashFlowChart(items: projections, assumptions: .default)
+
+            // 3. 12个月现金余量趋势图
+            CashFlowChart(items: projectionResult.baselineItems, assumptions: .default)
+
+            // 4. 负债与近期还款
             if !loans.isEmpty || !creditCards.isEmpty {
                 DebtProgressCard(
                     summary: debtProgressSummary,
@@ -139,9 +171,9 @@ struct OverviewTab: View {
                 .accessibilityHidden(true)
 
             VStack(spacing: 8) {
-                Text("看清未来还款压力")
+                Text("看清未来还款压力与目标达成")
                     .font(.title2.bold())
-                Text("记录一笔资产或负债，查看近期应还金额和现金余量。")
+                Text("引入 CFA/CFP 专业视角：记录资产、负债或规划目标，实时获得现金流推演与智能行动建议。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -156,13 +188,13 @@ struct OverviewTab: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.97, pressedOpacity: 0.85))
                 .controlSize(.large)
 
                 Button(action: loadDemoData) {
                     Label("载入示例体验", systemImage: "wand.and.stars")
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.97, pressedOpacity: 0.85))
                 .controlSize(.large)
             }
 
@@ -178,8 +210,8 @@ struct OverviewTab: View {
 
     private func loadDemoData() {
         do {
-            try DemoDataService.load(into: modelContext, replacingExisting: false)
-            withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.38, dampingFraction: 1)) {
+            try DemoDataService.load(into: modelContext, replacingExisting: false, persona: .debtRelief)
+            AppMotion.perform(level: .momentum, reduceMotion: reduceMotion) {
                 demoLoaded.toggle()
             }
         } catch {

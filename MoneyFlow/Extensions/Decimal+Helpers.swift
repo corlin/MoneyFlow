@@ -1,5 +1,10 @@
 import Foundation
 
+enum CurrencyFormatStyle {
+    case standard
+    case compact
+}
+
 extension Double {
     var formattedCurrency: String {
         let formatter = NumberFormatter()
@@ -17,6 +22,15 @@ extension Double {
             return String(format: "¥%.2f万", wan)
         } else {
             return formattedCurrency
+        }
+    }
+
+    func formattedCurrency(style: CurrencyFormatStyle = .standard) -> String {
+        switch style {
+        case .standard:
+            return formattedCurrency
+        case .compact:
+            return formattedCurrencyCompact
         }
     }
 
