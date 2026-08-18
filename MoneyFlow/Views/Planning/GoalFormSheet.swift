@@ -1,6 +1,30 @@
 import SwiftUI
 import SwiftData
 
+enum GoalArchetype: String, CaseIterable, Identifiable {
+    case emergency = "emergency"
+    case debtPaydown = "debtPaydown"
+    case dreamMilestone = "dreamMilestone"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .emergency: return "🛡️ 应急防线"
+        case .debtPaydown: return "⚡ 提前还贷"
+        case .dreamMilestone: return "🎯 储蓄心愿"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .emergency: return "防御底线 · 自动锁定 Tier 1 必需"
+        case .debtPaydown: return "加速脱困 · 优先结清高息贷款"
+        case .dreamMilestone: return "阶段目标 · 置业/购车/心愿积累"
+        }
+    }
+}
+
 struct GoalFormSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -9,17 +33,16 @@ struct GoalFormSheet: View {
     var totalCash: Double
     var totalExistingEarmarked: Double
     var activeLoans: [Loan]
+    var estimatedMonthlyMustPay: Double = 5000
 
+    @State private var archetype: GoalArchetype = .emergency
     @State private var name: String = ""
-    @State private var category: GoalCategory = .capitalMilestone
     @State private var targetAmountString: String = ""
     @State private var earmarkedAmountString: String = ""
-    @State private var priority: GoalPriority = .important
     @State private var hasTargetDate: Bool = false
     @State private var targetDate: Date = Calendar.current.date(byAdding: .year, value: 1, to: Date()) ?? Date()
-    @State private var selectedLoanId: UUID? = nil
+    @State private var selectedLoan: Loan? = nil
     @State private var note: String = ""
-
     @State private var errorMessage: String? = nil
 
     private var isEditing: Bool { goalToEdit != nil }
@@ -32,71 +55,112 @@ struct GoalFormSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("目标基本信息") {
-                    TextField("目标名称（如：购车首付、应急金）", text: $name)
-
-                    Picker("目标类别", selection: $category) {
-                        ForEach(GoalCategory.allCases) { cat in
-                            Label(cat.title, systemImage: cat.systemImage).tag(cat)
+                if !isEditing {
+                    Section("选择目标类型") {
+                        Picker("目标类型", selection: $archetype) {
+                            ForEach(GoalArchetype.allCases) { type in
+                                Text(type.title).tag(type)
+                            }
                         }
-                    }
-
-                    Picker("规划优先级", selection: $priority) {
-                        ForEach(GoalPriority.allCases) { pri in
-                            Text(pri.title).tag(pri)
+                        .pickerStyle(.segmented)
+                        .onChange(of: archetype) { _, newType in
+                            applyArchetypeDefaults(newType)
                         }
+
+                        Text(archetype.subtitle)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
                 }
 
-                Section("资金与分账") {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("目标所需总金额")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        TextField("如 100,000", text: $targetAmountString)
-                            .keyboardType(.decimalPad)
-                            .font(.system(.body, design: .monospaced))
+                Section("目标详情") {
+                    TextField("目标名称", text: $name)
+
+                    if archetype == .debtPaydown && !activeLoans.isEmpty {
+                        Picker("选择加速清偿的贷款", selection: $selectedLoan) {
+                            Text("请选择贷款...").tag(Optional<Loan>.none)
+                            ForEach(activeLoans) { loan in
+                                Text("\(loan.name) (年化 \(String(format: "%.1f", loan.annualRate * 100))%)")
+                                    .tag(Optional(loan))
+                            }
+                        }
+                        .onChange(of: selectedLoan) { _, loan in
+                            if let loan {
+                                name = "⚡ 提前结清\(loan.name)"
+                                targetAmountString = String(format: "%.0f", loan.remainingPrincipal)
+                            }
+                        }
                     }
 
                     VStack(alignment: .leading, spacing: 6) {
                         HStack {
-                            Text("从当前存量现金中虚拟分账锁定")
+                            Text("目标总金额")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Spacer()
-                            Text("可用自由现金: \(availableCashToEarmark.formattedCurrency(style: .compact))")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
+                            if archetype == .emergency {
+                                HStack(spacing: 6) {
+                                    Button("3个月 (\(Int(estimatedMonthlyMustPay * 3 / 1000))k)") {
+                                        targetAmountString = String(format: "%.0f", estimatedMonthlyMustPay * 3)
+                                    }
+                                    .buttonStyle(.borderless)
+                                    .font(.caption2.weight(.medium))
+
+                                    Button("6个月 (\(Int(estimatedMonthlyMustPay * 6 / 1000))k)") {
+                                        targetAmountString = String(format: "%.0f", estimatedMonthlyMustPay * 6)
+                                    }
+                                    .buttonStyle(.borderless)
+                                    .font(.caption2.weight(.medium))
+                                }
+                            }
                         }
-                        TextField("如 20,000 (可为 0)", text: $earmarkedAmountString)
+
+                        TextField("如 50,000", text: $targetAmountString)
                             .keyboardType(.decimalPad)
                             .font(.system(.body, design: .monospaced))
                     }
                 }
 
-                if category == .acceleratedDebtPaydown && !activeLoans.isEmpty {
-                    Section("关联加速还款贷款") {
-                        Picker("指定偿还贷款", selection: $selectedLoanId) {
-                            Text("无特定贷款 (全量加速)").tag(Optional<UUID>.none)
-                            ForEach(activeLoans) { loan in
-                                Text("\(loan.name) (年化 \(String(format: "%.1f", loan.annualRate * 100))%)")
-                                    .tag(Optional(loan.id))
+                Section("存量现金分账") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("从当前存量现金中虚拟锁定")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text("可用: \(availableCashToEarmark.formattedCurrency(style: .compact))")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        TextField("0.00 (纯靠月结余可填 0)", text: $earmarkedAmountString)
+                            .keyboardType(.decimalPad)
+                            .font(.system(.body, design: .monospaced))
+
+                        if availableCashToEarmark > 0 {
+                            HStack(spacing: 8) {
+                                Button("清零") { earmarkedAmountString = "0" }
+                                    .font(.caption2)
+                                    .buttonStyle(.borderless)
+                                Button("注入全部可用自由现金") {
+                                    earmarkedAmountString = String(format: "%.0f", availableCashToEarmark)
+                                }
+                                .font(.caption2)
+                                .buttonStyle(.borderless)
                             }
+                            .padding(.top, 2)
                         }
                     }
                 }
 
-                Section("期望达成时间") {
-                    Toggle("设定截止日期 (用于推演延期风险)", isOn: $hasTargetDate)
+                if archetype == .dreamMilestone {
+                    Section("期望时间") {
+                        Toggle("设定截止日期 (推演延期风险)", isOn: $hasTargetDate)
 
-                    if hasTargetDate {
-                        DatePicker("期望达成年月", selection: $targetDate, displayedComponents: [.date])
+                        if hasTargetDate {
+                            DatePicker("期望达成年月", selection: $targetDate, displayedComponents: [.date])
+                        }
                     }
-                }
-
-                Section("备注说明") {
-                    TextField("记录目标背景或具体考量（可选）", text: $note, axis: .vertical)
-                        .lineLimit(2...4)
                 }
 
                 if let error = errorMessage {
@@ -107,7 +171,7 @@ struct GoalFormSheet: View {
                     }
                 }
             }
-            .navigationTitle(isEditing ? "编辑目标" : "新建规划目标")
+            .navigationTitle(isEditing ? "编辑规划目标" : "新建规划目标")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -124,21 +188,51 @@ struct GoalFormSheet: View {
         }
     }
 
+    private func applyArchetypeDefaults(_ type: GoalArchetype) {
+        switch type {
+        case .emergency:
+            name = "🛡️ 3个月家庭应急防线"
+            targetAmountString = String(format: "%.0f", max(10000, estimatedMonthlyMustPay * 3))
+            hasTargetDate = false
+        case .debtPaydown:
+            if let firstLoan = activeLoans.first {
+                selectedLoan = firstLoan
+                name = "⚡ 提前结清\(firstLoan.name)"
+                targetAmountString = String(format: "%.0f", firstLoan.remainingPrincipal)
+            } else {
+                name = "⚡ 提前还贷加速"
+                targetAmountString = ""
+            }
+            hasTargetDate = false
+        case .dreamMilestone:
+            name = "🎯 置业/购车心愿"
+            targetAmountString = ""
+            hasTargetDate = true
+        }
+    }
+
     private func setupInitialValues() {
         if let goal = goalToEdit {
             name = goal.name
-            category = goal.category
             targetAmountString = String(format: "%.0f", goal.targetAmount)
             earmarkedAmountString = goal.currentEarmarkedAmount > 0 ? String(format: "%.0f", goal.currentEarmarkedAmount) : ""
-            priority = goal.priority
             if let date = goal.targetDate {
                 hasTargetDate = true
                 targetDate = date
             } else {
                 hasTargetDate = false
             }
-            selectedLoanId = goal.targetLoanId
             note = goal.note
+            if let loanId = goal.targetLoanId {
+                selectedLoan = activeLoans.first { $0.id == loanId }
+            }
+            switch goal.category {
+            case .emergencyBuffer: archetype = .emergency
+            case .acceleratedDebtPaydown: archetype = .debtPaydown
+            default: archetype = .dreamMilestone
+            }
+        } else {
+            applyArchetypeDefaults(.emergency)
         }
     }
 
@@ -161,6 +255,21 @@ struct GoalFormSheet: View {
             return
         }
 
+        let category: GoalCategory
+        let priority: GoalPriority
+
+        switch archetype {
+        case .emergency:
+            category = .emergencyBuffer
+            priority = .essential
+        case .debtPaydown:
+            category = .acceleratedDebtPaydown
+            priority = .important
+        case .dreamMilestone:
+            category = .capitalMilestone
+            priority = .aspirational
+        }
+
         if let existing = goalToEdit {
             existing.name = trimmedName
             existing.category = category
@@ -168,7 +277,7 @@ struct GoalFormSheet: View {
             existing.currentEarmarkedAmount = earmarked
             existing.priority = priority
             existing.targetDate = hasTargetDate ? targetDate : nil
-            existing.targetLoanId = selectedLoanId
+            existing.targetLoanId = selectedLoan?.id
             existing.note = note
             existing.updatedAt = Date()
         } else {
@@ -179,7 +288,7 @@ struct GoalFormSheet: View {
                 currentEarmarkedAmount: earmarked,
                 priority: priority,
                 targetDate: hasTargetDate ? targetDate : nil,
-                targetLoanId: selectedLoanId,
+                targetLoanId: selectedLoan?.id,
                 note: note
             )
             modelContext.insert(newGoal)

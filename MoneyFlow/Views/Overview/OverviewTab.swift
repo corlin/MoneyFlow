@@ -66,14 +66,6 @@ struct OverviewTab: View {
         )
     }
 
-    private var liquiditySummary: LiquidityBufferSummary {
-        LiquidityBufferSummary.make(items: projectionResult.baselineItems, monthlyIncome: monthlyIncome)
-    }
-
-    private var debtProgressSummary: DebtProgressSummary {
-        DebtProgressSummary.make(loans: loans, creditCards: creditCards)
-    }
-
     private var upcomingPaymentSummary: UpcomingPaymentSummary {
         UpcomingPaymentSummary.make(reminders: reminders)
     }
@@ -117,7 +109,8 @@ struct OverviewTab: View {
                     goalToEdit: nil,
                     totalCash: totalCash,
                     totalExistingEarmarked: goals.reduce(0) { $0 + $1.currentEarmarkedAmount },
-                    activeLoans: loans.filter { $0.remainingPrincipal > 0 }
+                    activeLoans: loans.filter { $0.remainingPrincipal > 0 },
+                    estimatedMonthlyMustPay: projectionResult.currentMonthlyMustPay
                 )
             }
             .sheet(item: $loanToOpen) { loan in
@@ -138,25 +131,17 @@ struct OverviewTab: View {
 
     private var populatedOverview: some View {
         LazyVStack(spacing: 16) {
-            // 1. CFP 智能体检与建议卡
-            CFPInsightsCard(analysis: debtAnalysis) {
-                // 跳转到规划 tab (由系统导航或用户切换)
+            // 模块 1: CFP 财务韧性与健康中枢 (整合生命线指标、黄金建议与净现金头寸)
+            FinancialResilienceHubView(analysis: debtAnalysis) {
+                // 引导用户去规划 tab
             }
 
-            // 2. 偿债缓冲卡
-            LiquidityBufferCard(summary: liquiditySummary)
-
-            // 3. 12个月现金余量趋势图
+            // 模块 2: 12 个月确定性现金流走势图
             CashFlowChart(items: projectionResult.baselineItems, assumptions: .default)
 
-            // 4. 负债与近期还款
+            // 模块 3: 未来 30 天紧迫还款
             if !loans.isEmpty || !creditCards.isEmpty {
-                DebtProgressCard(
-                    summary: debtProgressSummary,
-                    netCashPosition: debtAnalysis.netCashPosition
-                )
                 UpcomingPaymentsCard(summary: upcomingPaymentSummary, onSelect: openPaymentSource)
-                DebtHealthCard(analysis: debtAnalysis, rateThreshold: rateThreshold)
             }
         }
         .padding()

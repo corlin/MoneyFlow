@@ -1,20 +1,20 @@
 import SwiftUI
 import Charts
 
-public enum SandboxChartMode: String, CaseIterable, Identifiable {
+enum SandboxChartMode: String, CaseIterable, Identifiable {
     case balanceLine = "balanceLine"
     case waterfall = "waterfall"
 
-    public var id: String { rawValue }
+    var id: String { rawValue }
 
-    public var title: String {
+    var title: String {
         switch self {
         case .balanceLine: return "现金余额走势"
         case .waterfall: return "月度收支瀑布"
         }
     }
 
-    public var systemImage: String {
+    var systemImage: String {
         switch self {
         case .balanceLine: return "chart.xyaxis.line"
         case .waterfall: return "chart.bar.xaxis"
@@ -29,7 +29,6 @@ struct DynamicCashFlowSandboxView: View {
 
     @State private var chartMode: SandboxChartMode = .balanceLine
     @State private var selectedMonthLabel: String? = nil
-    @State private var isControlsExpanded: Bool = true
 
     private var items: [MonthlyCashFlowItem] { result.baselineItems }
     private var scenarioItems: [MonthlyCashFlowItem] { result.scenarioItems }
@@ -46,11 +45,11 @@ struct DynamicCashFlowSandboxView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            // 头部：标题与视图切换器
-            HStack {
+            // 头部：标题、情景重置与形态切换
+            HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text("动态现金流推演沙盘")
+                        Text("动态推演沙盘")
                             .font(.headline)
                             .foregroundStyle(.primary)
 
@@ -63,13 +62,31 @@ struct DynamicCashFlowSandboxView: View {
                                 .background(Color.orange.opacity(0.15), in: Capsule())
                         }
                     }
-
-                    Text("双轨推演 · 压力测试 · 还贷策略仿真")
+                    Text("点选下方胶囊即刻观察曲线与目标形变")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
                 Spacer()
+
+                if scenario.isModifiedFromBaseline {
+                    HStack(spacing: 8) {
+                        Button("还原") {
+                            withAnimation(.spring(duration: 0.25)) {
+                                scenario.reset()
+                            }
+                        }
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+
+                        Button("设为基准") {
+                            onCommitAsBaseline()
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.accentColor)
+                    }
+                    .padding(.trailing, 4)
+                }
 
                 Picker("图表形态", selection: $chartMode) {
                     ForEach(SandboxChartMode.allCases) { mode in
@@ -77,7 +94,7 @@ struct DynamicCashFlowSandboxView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 170)
+                .frame(width: 150)
             }
 
             // 核心推演图表区域
@@ -96,20 +113,15 @@ struct DynamicCashFlowSandboxView: View {
             .padding(14)
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
 
-            // 策略省息与提速高亮 Banner (若启用了雪崩法或滚雪球)
-            if scenario.repaymentStrategy != .standard && result.strategyInterestSaved > 0 {
-                strategySavingBanner
-            }
-
-            // 可交互推演调节控制台
-            sandboxControlsCard
+            // 原生轻量浮动胶囊控制手柄 (Floating Scenario Pills)
+            floatingScenarioPills
         }
     }
 
     // MARK: - 走势折线图 (Line Chart)
     private var lineChartView: some View {
         Chart {
-            // 基准轨 (Baseline) 面积与折线
+            // 基准轨 (Baseline)
             ForEach(items) { item in
                 AreaMark(
                     x: .value("月份", item.monthLabel),
@@ -138,7 +150,7 @@ struct DynamicCashFlowSandboxView: View {
                 .symbolSize(selectedMonthLabel == item.monthLabel ? 45 : 18)
             }
 
-            // 情景轨 (Scenario) 虚线对比
+            // 情景轨 (Scenario) 虚线
             if scenario.isModifiedFromBaseline {
                 ForEach(scenarioItems) { scenItem in
                     LineMark(
@@ -157,7 +169,6 @@ struct DynamicCashFlowSandboxView: View {
                 }
             }
 
-            // 选中的指示竖线
             if let selected = selectedItem {
                 RuleMark(x: .value("选中月份", selected.monthLabel))
                     .foregroundStyle(Color.secondary.opacity(0.35))
@@ -165,14 +176,13 @@ struct DynamicCashFlowSandboxView: View {
             }
         }
         .chartXSelection(value: $selectedMonthLabel)
-        .frame(height: 190)
+        .frame(height: 180)
     }
 
     // MARK: - 瀑布收支柱状图 (Waterfall Chart)
     private var waterfallChartView: some View {
         Chart {
             ForEach(items) { item in
-                // 收入柱
                 BarMark(
                     x: .value("月份", item.monthLabel),
                     y: .value("金额", item.estimatedIncome)
@@ -180,7 +190,6 @@ struct DynamicCashFlowSandboxView: View {
                 .foregroundStyle(Color.green.opacity(0.85))
                 .position(by: .value("类型", "收入"))
 
-                // 刚性流出柱
                 BarMark(
                     x: .value("月份", item.monthLabel),
                     y: .value("金额", item.totalMustPay)
@@ -188,7 +197,6 @@ struct DynamicCashFlowSandboxView: View {
                 .foregroundStyle(Color.red.opacity(0.80))
                 .position(by: .value("类型", "刚性支出"))
 
-                // 净结余柱
                 BarMark(
                     x: .value("月份", item.monthLabel),
                     y: .value("金额", item.monthlySurplus)
@@ -204,12 +212,12 @@ struct DynamicCashFlowSandboxView: View {
             }
         }
         .chartXSelection(value: $selectedMonthLabel)
-        .frame(height: 190)
+        .frame(height: 180)
     }
 
     // MARK: - 探针明细卡片
     private func monthDetailScrubCard(item: MonthlyCashFlowItem, scenarioItem: MonthlyCashFlowItem?) -> some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             HStack {
                 Text("\(item.monthLabel) 预测明细")
                     .font(.caption.weight(.bold))
@@ -217,19 +225,19 @@ struct DynamicCashFlowSandboxView: View {
 
                 Spacer()
 
-                Text("期末现金: \(item.endingCash.formattedCurrency())")
+                Text("期末现金: \(item.endingCash.formattedCurrencyCompact)")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(item.endingCash < 0 ? .red : .blue)
 
                 if let scen = scenarioItem, scenario.isModifiedFromBaseline {
                     let diff = scen.endingCash - item.endingCash
-                    Text("(\(diff >= 0 ? "+" : "")\(diff.formattedCurrency(style: .compact)))")
+                    Text("(\(diff >= 0 ? "+" : "")\(diff.formattedCurrencyCompact))")
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(diff >= 0 ? .green : .orange)
                 }
             }
 
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 metricItem(label: "预计收入", value: item.estimatedIncome, color: .green)
                 metricItem(label: "刚性支出", value: item.totalMustPay, color: .red)
                 metricItem(label: "自由结余", value: item.monthlySurplus, color: .purple)
@@ -245,181 +253,117 @@ struct DynamicCashFlowSandboxView: View {
             Text(label)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-            Text(value.formattedCurrency(style: .compact))
+            Text(value.formattedCurrencyCompact)
                 .font(.system(.caption, design: .monospaced, weight: .semibold))
                 .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // MARK: - 策略省息 Banner
-    private var strategySavingBanner: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "bolt.fill")
-                .font(.title2)
-                .foregroundStyle(.yellow)
+    // MARK: - 沉浸式胶囊手柄控制台 (Pill Handlers)
+    private var floatingScenarioPills: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // 1. 收入冲击胶囊组
+            VStack(alignment: .leading, spacing: 6) {
+                Text("📉 收入冲击压力测试")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(scenario.repaymentStrategy.title) 效果显著")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.white)
-
-                Text("预计累计节约利息 \(result.strategyInterestSaved.formattedCurrency())，且使无债结清日提前 \(result.strategyMonthsSaved) 个月！")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.9))
+                HStack(spacing: 8) {
+                    incomePill(pct: 0.0, title: "基准 (0%)")
+                    incomePill(pct: -0.10, title: "-10%")
+                    incomePill(pct: -0.20, title: "-20% 承压")
+                    incomePill(pct: -0.30, title: "-30% 极值")
+                }
             }
 
-            Spacer()
-        }
-        .padding(12)
-        .background(
-            LinearGradient(
-                colors: [Color.orange, Color.red.opacity(0.85)],
-                startPoint: .leading,
-                endPoint: .trailing
-            ),
-            in: RoundedRectangle(cornerRadius: 12)
-        )
-    }
-
-    // MARK: - 交互沙盘调节控制台
-    private var sandboxControlsCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Button {
-                withAnimation(.spring(duration: 0.28)) {
-                    isControlsExpanded.toggle()
-                }
-            } label: {
+            // 2. 还贷策略分流胶囊组
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Label("情景沙盘推演调节器", systemImage: "slider.horizontal.3")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
+                    Text("⚡ 负债清偿策略")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
 
                     Spacer()
 
-                    Image(systemName: isControlsExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if scenario.repaymentStrategy != .standard && result.strategyInterestSaved > 0 {
+                        Text("⚡ 预计省息 \(result.strategyInterestSaved.formattedCurrencyCompact) · 提前 \(result.strategyMonthsSaved) 月")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.orange)
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    ForEach(RepaymentStrategy.allCases) { strat in
+                        strategyPill(strat)
+                    }
                 }
             }
 
-            if isControlsExpanded {
-                VStack(spacing: 14) {
-                    // 1. 收入波动滑块
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("月度收入波动冲击")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(incomeShockLabel(scenario.incomeAdjustmentPct))
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(scenario.incomeAdjustmentPct < 0 ? .red : (scenario.incomeAdjustmentPct > 0 ? .green : .primary))
-                        }
+            // 3. 突发单笔支出快捷胶囊
+            HStack(spacing: 8) {
+                Text("⚠️ 突发开支:")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
 
-                        Slider(
-                            value: $scenario.incomeAdjustmentPct,
-                            in: -0.50...0.50,
-                            step: 0.05
-                        )
-                        .tint(scenario.incomeAdjustmentPct < 0 ? .red : .blue)
-                        .sensoryFeedback(.impact(weight: .light), trigger: scenario.incomeAdjustmentPct)
-                    }
-
-                    // 2. 突发单笔支出模拟
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("突发单笔大额支出")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        HStack(spacing: 8) {
-                            lumpSumButton(amount: 0, label: "无")
-                            lumpSumButton(amount: 10000, label: "¥1万")
-                            lumpSumButton(amount: 30000, label: "¥3万")
-                            lumpSumButton(amount: 50000, label: "¥5万")
-                        }
-                    }
-
-                    // 3. 负债加速清偿策略选择
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("负债加速还款策略")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        Picker("还款策略", selection: $scenario.repaymentStrategy) {
-                            ForEach(RepaymentStrategy.allCases) { strat in
-                                Text(strat.shortTitle).tag(strat)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .sensoryFeedback(.selection, trigger: scenario.repaymentStrategy)
-
-                        Text(scenario.repaymentStrategy.description)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 2)
-                    }
-
-                    Divider()
-
-                    // 控制按钮
-                    HStack(spacing: 12) {
-                        if scenario.isModifiedFromBaseline {
-                            Button {
-                                withAnimation {
-                                    scenario.reset()
-                                }
-                            } label: {
-                                Label("重置为基准", systemImage: "arrow.counterclockwise")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-
-                        Spacer()
-
-                        if scenario.isModifiedFromBaseline {
-                            Button(action: onCommitAsBaseline) {
-                                Text("固化为新基准")
-                                    .font(.subheadline.weight(.semibold))
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 6)
-                                    .background(Color.accentColor, in: Capsule())
-                                    .foregroundStyle(.white)
-                            }
-                        }
-                    }
-                }
+                lumpPill(amount: 0, title: "无")
+                lumpPill(amount: 20000, title: "+¥2万")
+                lumpPill(amount: 50000, title: "+¥5万")
+                Spacer()
             }
         }
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
     }
 
-    private func lumpSumButton(amount: Double, label: String) -> some View {
-        let isSelected = abs(scenario.lumpSumExpense - amount) < 0.01
+    private func incomePill(pct: Double, title: String) -> some View {
+        let isSelected = abs(scenario.incomeAdjustmentPct - pct) < 0.001
         return Button {
-            withAnimation {
-                scenario.lumpSumExpense = amount
+            withAnimation(.spring(duration: 0.25)) {
+                scenario.incomeAdjustmentPct = pct
             }
         } label: {
-            Text(label)
+            Text(title)
                 .font(.caption.weight(isSelected ? .bold : .regular))
                 .foregroundStyle(isSelected ? .white : .primary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 6)
-                .background(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+                .background(isSelected ? (pct < 0 ? Color.orange : Color.accentColor) : Color(.tertiarySystemGroupedBackground), in: Capsule())
         }
-        .sensoryFeedback(.impact(weight: .light), trigger: scenario.lumpSumExpense)
+        .sensoryFeedback(.impact(weight: .light), trigger: scenario.incomeAdjustmentPct)
     }
 
-    private func incomeShockLabel(_ pct: Double) -> String {
-        if abs(pct) < 0.001 {
-            return "正常基准 (0%)"
-        } else if pct > 0 {
-            return "收入增长 (+\(Int(pct * 100))%)"
-        } else {
-            return "承压受损 (\(Int(pct * 100))%)"
+    private func strategyPill(_ strat: RepaymentStrategy) -> some View {
+        let isSelected = scenario.repaymentStrategy == strat
+        return Button {
+            withAnimation(.spring(duration: 0.25)) {
+                scenario.repaymentStrategy = strat
+            }
+        } label: {
+            Text(strat.shortTitle)
+                .font(.caption.weight(isSelected ? .bold : .regular))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+                .background(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground), in: Capsule())
         }
+        .sensoryFeedback(.selection, trigger: scenario.repaymentStrategy)
+    }
+
+    private func lumpPill(amount: Double, title: String) -> some View {
+        let isSelected = abs(scenario.lumpSumExpense - amount) < 0.01
+        return Button {
+            withAnimation(.spring(duration: 0.25)) {
+                scenario.lumpSumExpense = amount
+            }
+        } label: {
+            Text(title)
+                .font(.caption2.weight(isSelected ? .bold : .regular))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(isSelected ? Color.orange : Color(.tertiarySystemGroupedBackground), in: Capsule())
+        }
+        .sensoryFeedback(.impact(weight: .light), trigger: scenario.lumpSumExpense)
     }
 }

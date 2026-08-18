@@ -6,6 +6,7 @@ struct GoalListView: View {
     let summary: MultiGoalSummary
     let totalCash: Double
     let activeLoans: [Loan]
+    var estimatedMonthlyMustPay: Double = 5000
 
     @State private var showingAddSheet = false
     @State private var editingGoal: FinancialGoal? = nil
@@ -39,7 +40,7 @@ struct GoalListView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
-                    Text("存量分账总额 (\(summary.totalEarmarkedAmount.formattedCurrency())) 超过实际总现金 (\(totalCash.formattedCurrency()))，请调整分账金额以防资金假象。")
+                    Text("存量分账总额 (\(summary.totalEarmarkedAmount.formattedCurrencyCompact)) 超过实际总现金 (\(totalCash.formattedCurrencyCompact))，请调整分账金额以防资金假象。")
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
@@ -66,7 +67,8 @@ struct GoalListView: View {
                 goalToEdit: nil,
                 totalCash: totalCash,
                 totalExistingEarmarked: summary.totalEarmarkedAmount,
-                activeLoans: activeLoans
+                activeLoans: activeLoans,
+                estimatedMonthlyMustPay: estimatedMonthlyMustPay
             )
         }
         .sheet(item: $editingGoal) { goal in
@@ -74,7 +76,8 @@ struct GoalListView: View {
                 goalToEdit: goal,
                 totalCash: totalCash,
                 totalExistingEarmarked: summary.totalEarmarkedAmount,
-                activeLoans: activeLoans
+                activeLoans: activeLoans,
+                estimatedMonthlyMustPay: estimatedMonthlyMustPay
             )
         }
     }

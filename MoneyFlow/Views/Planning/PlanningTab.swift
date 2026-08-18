@@ -54,7 +54,8 @@ struct PlanningTab: View {
                     GoalListView(
                         summary: projectionResult.goalSummary,
                         totalCash: totalCash,
-                        activeLoans: loans.filter { $0.remainingPrincipal > 0 }
+                        activeLoans: loans.filter { $0.remainingPrincipal > 0 },
+                        estimatedMonthlyMustPay: projectionResult.currentMonthlyMustPay
                     )
                 }
                 .padding(.horizontal, 16)
