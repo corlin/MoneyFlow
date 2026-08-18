@@ -14,7 +14,6 @@ struct BatchLoanOCRImportSheet: View {
     @State private var platformPrefix = "微粒贷"
     @State private var errorMessage: String?
     @State private var saveSucceeded = false
-    @State private var customPrefixText = ""
 
     private let presetPrefixes = ["微粒贷", "借呗", "度小满", "京东金条", "分期乐", "其他"]
 

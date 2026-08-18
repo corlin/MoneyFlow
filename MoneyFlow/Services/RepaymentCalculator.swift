@@ -150,22 +150,35 @@ enum RepaymentCalculator {
                 break
             }
 
-            // 计算当期本息月供
+            // 计算当期本金与利息
             let monthlyRate = currentRate / 12.0
             let remainingPeriodsCount = max(1, activeTotalPeriods - period + 1)
 
+            let interestPart = currentPrincipal * monthlyRate
+            var principalPart: Double
             let monthlyPaymentDouble: Double
-            if monthlyRate == 0 {
-                monthlyPaymentDouble = currentPrincipal / Double(remainingPeriodsCount)
-            } else {
-                let factor = pow(1.0 + monthlyRate, Double(remainingPeriodsCount))
-                monthlyPaymentDouble = currentPrincipal * (monthlyRate * factor) / max(0.00001, factor - 1.0)
+
+            switch method {
+            case .equalPrincipal:
+                principalPart = currentPrincipal / Double(remainingPeriodsCount)
+                monthlyPaymentDouble = principalPart + interestPart
+            case .interestFirst:
+                principalPart = (period >= activeTotalPeriods) ? currentPrincipal : 0.0
+                monthlyPaymentDouble = principalPart + interestPart
+            case .lumpSum:
+                principalPart = (period >= activeTotalPeriods) ? currentPrincipal : 0.0
+                monthlyPaymentDouble = (period >= activeTotalPeriods) ? (currentPrincipal + interestPart * Double(totalPeriods)) : 0.0
+            case .equalPayment:
+                if monthlyRate == 0 {
+                    monthlyPaymentDouble = currentPrincipal / Double(remainingPeriodsCount)
+                } else {
+                    let factor = pow(1.0 + monthlyRate, Double(remainingPeriodsCount))
+                    monthlyPaymentDouble = currentPrincipal * (monthlyRate * factor) / max(0.00001, factor - 1.0)
+                }
+                principalPart = monthlyPaymentDouble - interestPart
             }
 
             currentMonthlyPayment = monthlyPaymentDouble
-
-            let interestPart = currentPrincipal * monthlyRate
-            var principalPart = monthlyPaymentDouble - interestPart
 
             if period >= activeTotalPeriods || principalPart > currentPrincipal {
                 principalPart = currentPrincipal

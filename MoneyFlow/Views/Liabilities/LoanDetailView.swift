@@ -13,21 +13,11 @@ struct LoanDetailView: View {
     @State private var showingEventSheet = false
     @State private var eventSheetDefaultType: AdjustmentType = .rateAdjustment
     @State private var eventToEdit: LoanAdjustmentEvent? = nil
-    @State private var cachedSummary: RepaymentSummary?
     @State private var undoAction: UndoAction?
     @State private var errorMessage: String?
     @State private var paymentFeedback = false
 
-    private var summary: RepaymentSummary { cachedSummary ?? calculateSummary() }
-
-    private var calculationKey: String {
-        let eventsKey = loan.adjustmentEvents.map { "\($0.id)-\($0.updatedAt.timeIntervalSince1970)" }.joined(separator: ",")
-        return [
-            String(loan.totalAmount), String(loan.annualRate), String(loan.totalPeriods),
-            loan.repaymentMethod.rawValue, String(loan.startDate.timeIntervalSince1970),
-            String(loan.paymentDayOfMonth), eventsKey
-        ].joined(separator: "|")
-    }
+    private var summary: RepaymentSummary { calculateSummary() }
 
     private var savingsBannerSubtext: String {
         var text = "历次变更已累计为您节省利息 \(summary.cumulativeInterestSaved.formattedCurrencyCompact)"
@@ -90,7 +80,6 @@ struct LoanDetailView: View {
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )) { Button("好", role: .cancel) {} } message: { Text(errorMessage ?? "未知错误") }
-        .task(id: calculationKey) { cachedSummary = calculateSummary() }
         .sensoryFeedback(.success, trigger: paymentFeedback)
     }
 
@@ -346,7 +335,6 @@ struct LoanDetailView: View {
             modelContext.delete(event)
             loan.updatedAt = Date()
             try? modelContext.save()
-            cachedSummary = calculateSummary()
         }
     }
 

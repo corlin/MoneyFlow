@@ -46,7 +46,19 @@ struct LoanAdjustmentEventSheet: View {
 
                 Section("生效时间与期数") {
                     DatePicker("生效日期", selection: $eventDate, displayedComponents: [.date])
-                    Stepper("对应期数: 第 \(periodIndex) 期", value: $periodIndex, in: 1...max(loan.totalPeriods, 600))
+                    HStack {
+                        Text("对应生效期数")
+                        Spacer()
+                        TextField("期数", value: $periodIndex, format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 70)
+                            .textFieldStyle(.roundedBorder)
+                        Text("期")
+                            .foregroundStyle(.secondary)
+                        Stepper("", value: $periodIndex, in: 1...max(loan.totalPeriods, 600))
+                            .labelsHidden()
+                    }
                 }
 
                 if type == .rateAdjustment {
