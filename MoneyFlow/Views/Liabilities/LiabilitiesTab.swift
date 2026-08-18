@@ -10,6 +10,7 @@ struct LiabilitiesTab: View {
 
     @State private var showingAddLoanSheet = false
     @State private var showingAddCreditCardSheet = false
+    @State private var showingOCRImportSheet = false
     @State private var creditCardToEdit: CreditCard?
     @State private var undoAction: UndoAction?
     @State private var errorMessage: String?
@@ -24,12 +25,28 @@ struct LiabilitiesTab: View {
         NavigationStack {
             Group {
                 if loans.isEmpty && creditCards.isEmpty {
-                    EmptyStateView(
-                        icon: "doc.text.magnifyingglass",
-                        title: "还没有负债",
-                        subtitle: "记录贷款或信用卡，查看还款日和现金压力。",
-                        buttonTitle: "添加贷款"
-                    ) { showingAddLoanSheet = true }
+                    VStack(spacing: 16) {
+                        EmptyStateView(
+                            icon: "doc.text.magnifyingglass",
+                            title: "还没有负债",
+                            subtitle: "记录贷款或信用卡，查看还款日和现金压力。",
+                            buttonTitle: "添加单笔贷款"
+                        ) { showingAddLoanSheet = true }
+
+                        Button {
+                            showingOCRImportSheet = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "camera.viewfinder")
+                                Text("📸 截图批量录入多笔零星贷款")
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.accentColor)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color.accentColor.opacity(0.12), in: Capsule())
+                        }
+                    }
                 } else {
                     List {
                         Section {
@@ -53,7 +70,7 @@ struct LiabilitiesTab: View {
                         .listRowBackground(Color.appCardBackground)
 
                         if !loans.isEmpty {
-                            Section("贷款 · \(loans.count)") {
+                            Section {
                                 ForEach(loans) { loan in
                                     NavigationLink {
                                         LoanDetailView(loan: loan, rateThreshold: rateThreshold)
@@ -62,6 +79,21 @@ struct LiabilitiesTab: View {
                                     }
                                 }
                                 .onDelete(perform: deleteLoans)
+                            } header: {
+                                HStack {
+                                    Text("贷款 · \(loans.count)")
+                                    Spacer()
+                                    Button {
+                                        showingOCRImportSheet = true
+                                    } label: {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "camera.viewfinder")
+                                            Text("截图批量录入")
+                                        }
+                                        .font(.caption2.weight(.semibold))
+                                        .foregroundStyle(Color.accentColor)
+                                    }
+                                }
                             }
                         }
 
@@ -86,7 +118,8 @@ struct LiabilitiesTab: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        Button("添加贷款", systemImage: "house") { showingAddLoanSheet = true }
+                        Button("📸 截图批量录入贷款", systemImage: "camera.viewfinder") { showingOCRImportSheet = true }
+                        Button("添加单笔贷款", systemImage: "house") { showingAddLoanSheet = true }
                         Button("添加信用卡", systemImage: "creditcard") { showingAddCreditCardSheet = true }
                     } label: {
                         Image(systemName: "plus")
@@ -97,6 +130,7 @@ struct LiabilitiesTab: View {
             }
             .sheet(isPresented: $showingAddLoanSheet) { LoanForm() }
             .sheet(isPresented: $showingAddCreditCardSheet) { CreditCardForm() }
+            .sheet(isPresented: $showingOCRImportSheet) { BatchLoanOCRImportSheet() }
             .sheet(item: $creditCardToEdit) { CreditCardForm(cardToEdit: $0) }
             .safeAreaInset(edge: .bottom) {
                 if let undoAction {

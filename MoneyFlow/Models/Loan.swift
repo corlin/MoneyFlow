@@ -50,7 +50,7 @@ final class Loan {
     var categoryRaw: String = LoanCategory.mortgage.rawValue
     var totalAmount: Double = 0            // 贷款总额
     var remainingPrincipal: Double = 0     // 剩余本金
-    var annualRate: Double = 0.035         // 年化利率 (如 0.035 代表 3.5%)
+    var annualRate: Double = 0.035         // 起贷初始年化利率 (如 0.035 代表 3.5%)
     var repaymentMethodRaw: String = RepaymentMethod.equalPayment.rawValue
     var totalPeriods: Int = 360             // 总期数 (月)
     var paidPeriods: Int = 0                // 已还期数
@@ -63,6 +63,9 @@ final class Loan {
     var note: String = ""
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
+
+    @Relationship(deleteRule: .cascade, inverse: \LoanAdjustmentEvent.loan)
+    var adjustmentEvents: [LoanAdjustmentEvent] = []
 
     @Transient
     var category: LoanCategory {
@@ -85,6 +88,27 @@ final class Loan {
     var progress: Double {
         guard totalPeriods > 0 else { return 0 }
         return min(1.0, max(0.0, Double(paidPeriods) / Double(totalPeriods)))
+    }
+
+    @Transient
+    var sortedAdjustmentEvents: [LoanAdjustmentEvent] {
+        adjustmentEvents.sorted {
+            if $0.periodIndex != $1.periodIndex {
+                return $0.periodIndex < $1.periodIndex
+            }
+            return $0.date < $1.date
+        }
+    }
+
+    @Transient
+    var latestAnnualRate: Double {
+        let rateEvents = sortedAdjustmentEvents.filter { $0.type == .rateAdjustment && $0.newAnnualRate != nil }
+        return rateEvents.last?.newAnnualRate ?? annualRate
+    }
+
+    @Transient
+    var totalPrepaymentAmount: Double {
+        adjustmentEvents.filter { $0.type == .prepayment }.reduce(0.0) { $0 + ($1.prepaymentAmount ?? 0.0) }
     }
 
     init(
@@ -125,10 +149,11 @@ final class Loan {
         self.note = note
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.adjustmentEvents = []
     }
 
     func detachedCopy() -> Loan {
-        Loan(
+        let copy = Loan(
             id: id,
             name: name,
             category: category,
@@ -148,5 +173,21 @@ final class Loan {
             createdAt: createdAt,
             updatedAt: updatedAt
         )
+        copy.adjustmentEvents = adjustmentEvents.map {
+            LoanAdjustmentEvent(
+                id: $0.id,
+                date: $0.date,
+                periodIndex: $0.periodIndex,
+                type: $0.type,
+                newAnnualRate: $0.newAnnualRate,
+                prepaymentAmount: $0.prepaymentAmount,
+                prepaymentEffect: $0.prepaymentEffect,
+                note: $0.note,
+                loan: copy,
+                createdAt: $0.createdAt,
+                updatedAt: $0.updatedAt
+            )
+        }
+        return copy
     }
 }

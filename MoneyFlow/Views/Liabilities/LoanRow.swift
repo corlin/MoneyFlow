@@ -18,7 +18,7 @@ struct LoanRow: View {
                         HStack { Text(loan.name).font(.headline); Spacer(); badge }
                         VStack(alignment: .leading, spacing: 6) { Text(loan.name).font(.headline); badge }
                     }
-                    Text(loan.repaymentMethod.rawValue + " · 年化 " + String(format: "%.2f%%", loan.annualRate * 100))
+                    Text(loan.repaymentMethod.rawValue + " · 年化 " + loan.latestAnnualRate.formattedRatePercentage)
                     Text("每月\(loan.paymentDayOfMonth)日还款")
                 }
                 .font(.caption)

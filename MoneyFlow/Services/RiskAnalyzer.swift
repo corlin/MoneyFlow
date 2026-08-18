@@ -147,13 +147,14 @@ enum RiskAnalyzer {
 
         for loan in loans {
             let principal = loan.remainingPrincipal
-            if loan.annualRate <= rateThreshold {
+            let rate = loan.latestAnnualRate
+            if rate <= rateThreshold {
                 healthyDebt += principal
             } else {
                 warningDebt += principal
             }
             totalMonthlyService += loan.monthlyPayment
-            weightedInterestSum += principal * loan.annualRate
+            weightedInterestSum += principal * rate
         }
 
         for card in creditCards {

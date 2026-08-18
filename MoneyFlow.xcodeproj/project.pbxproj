@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		00E5AA23CADF40298A561A20 /* MultiGoalEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12246B3066447E769BBE68B /* MultiGoalEngine.swift */; };
 		05ABDBDEBD36D6D130A8EDF2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B185FC976CD5CC3660B8DC08 /* Assets.xcassets */; };
+		097BD25203A4D15DA932BAF2 /* LoanOCRParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1098F2D6CF3A5BA5C58BF4D /* LoanOCRParserTests.swift */; };
 		0CB57FD62613C117F083B7BA /* CreditCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68BC1AF1213334C24325C22A /* CreditCard.swift */; };
 		0FD4E9D105031625CD3DFB7E /* CreditCardForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F950500787322C91030B3E7C /* CreditCardForm.swift */; };
 		175DFCB543805A08A6A2BF81 /* DebtHealthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BB71633980A5313D769493 /* DebtHealthCard.swift */; };
 		1B228D33AB09E62F08920EDB /* LiabilitiesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7285206845FE1FD7E015AD18 /* LiabilitiesTab.swift */; };
 		227CC344351F7BA8537A4EF9 /* Loan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6168CAFB5E98ACF255302976 /* Loan.swift */; };
 		2EFFE4CBAEBF7A493BA02EE4 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6981D869AAC2BB8CAA1C0EC /* Color+Theme.swift */; };
+		2F8E462B3F30DB1B031BC425 /* LoanAdjustmentEventSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2976F7F73941BFDB1F69AD57 /* LoanAdjustmentEventSheet.swift */; };
 		37495EDCD9333B7DB0FFC9DB /* MoneyFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287EBA5F3FDF7439D59B590C /* MoneyFlowUITests.swift */; };
 		3B2CD2BAC7B759D91D34BEE4 /* LoanDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC571A50F746802EB286991 /* LoanDetailView.swift */; };
 		4195B6E5C6819910D485B2F0 /* NetWorthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 154EF3DE741498D6E3C7B9BA /* NetWorthCard.swift */; };
@@ -28,7 +30,9 @@
 		58F628E461864B094B9AC427 /* GoalCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EAA7218202D645F8DA8FD1F /* GoalCardView.swift */; };
 		6CCE37C81C0A4A0041A1C105 /* FinancialPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F88453924D4CE7C1A773123 /* FinancialPresentation.swift */; };
 		6E22AF2955D0D4AD53024E67 /* CashAccountRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45349140668E5D10DEF66B94 /* CashAccountRow.swift */; };
+		6E3EB112D5ABB265D13089B6 /* LoanOCRScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155180D9E16BECCA6A34254E /* LoanOCRScannerService.swift */; };
 		74E232E42A7EAEC3A300E2B2 /* Decimal+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35986DE9E47FFB8D7AB666E4 /* Decimal+Helpers.swift */; };
+		75B555718DB3225BAEEA8B2B /* LoanAdjustmentEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 612D9779C650DD9EA5AC5772 /* LoanAdjustmentEngineTests.swift */; };
 		78E50A7FABB28E621AEE33FB /* CashFlowProjector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0817CA82FA37A84E5ACEE6DE /* CashFlowProjector.swift */; };
 		7B2A645AA4781B45BD834A2C /* CreditCardRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB470C46762E016E55975FED /* CreditCardRow.swift */; };
 		84417F2FC442C45D185C4891 /* DynamicCashFlowSandboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFBF7A09A50020B705870E57 /* DynamicCashFlowSandboxView.swift */; };
@@ -37,6 +41,7 @@
 		925A9B3CEE584CDA8288F913 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9113CCEE226A81D0A6AF361F /* ContentView.swift */; };
 		A3C2CEC117183FD4A5CFB5C7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC795D51963B5FD8D6A7980 /* SettingsView.swift */; };
 		A615B85507A25EF367710BC9 /* CFPPlanningEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1FA23D19A6867F6AC1A2832 /* CFPPlanningEngineTests.swift */; };
+		A6B18E9F2C4FBF160B578C8A /* LoanAdjustmentEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D955BF35DDA3E0668E845528 /* LoanAdjustmentEvent.swift */; };
 		AA083839B21AFB2A35EBA34E /* LoanRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5965522D496ABCA5EDC28942 /* LoanRow.swift */; };
 		AAD1F0D02531C65FFD435E89 /* Date+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B8A64D30B7CE51621AB21A /* Date+Helpers.swift */; };
 		AD62C936461A475A93E73E02 /* PersistenceRecoveryCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0ECCE97A175472DCA3D7760 /* PersistenceRecoveryCoordinator.swift */; };
@@ -48,6 +53,7 @@
 		C028A81849DB22063F6256DA /* GoalListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB21401799B92104D769C48 /* GoalListView.swift */; };
 		C46089F4DEFC8B47E3F2DFAD /* FinancialGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB1790C9FE77169DB684C05 /* FinancialGoal.swift */; };
 		C8D3E17CFD9D2F0567C5CBE4 /* LoanForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F4F30961AB1646749AB3D7 /* LoanForm.swift */; };
+		CC28737A9C72FBDF96B7EBA6 /* BatchLoanOCRImportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC6746E4CB0C59AE1FBE234 /* BatchLoanOCRImportSheet.swift */; };
 		D3878900A377040A41E3629D /* RepaymentCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40DFCDA1EAAABEBFCF8CD34 /* RepaymentCalculator.swift */; };
 		D682378A40E3A9FFCED6BD89 /* PlanningScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7449381E34DC0BE137740A5 /* PlanningScenario.swift */; };
 		D81F492970A36B03CE6BBB96 /* FinancialResilienceHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF4A42949EE6CCD1BB898F9 /* FinancialResilienceHubView.swift */; };
@@ -83,9 +89,12 @@
 		0EAA7218202D645F8DA8FD1F /* GoalCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCardView.swift; sourceTree = "<group>"; };
 		0F88453924D4CE7C1A773123 /* FinancialPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialPresentation.swift; sourceTree = "<group>"; };
 		154EF3DE741498D6E3C7B9BA /* NetWorthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCard.swift; sourceTree = "<group>"; };
+		155180D9E16BECCA6A34254E /* LoanOCRScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanOCRScannerService.swift; sourceTree = "<group>"; };
 		24C6E77243F7BEF053668FC1 /* MoneyFlowTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MoneyFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		25BB71633980A5313D769493 /* DebtHealthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtHealthCard.swift; sourceTree = "<group>"; };
 		287EBA5F3FDF7439D59B590C /* MoneyFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyFlowUITests.swift; sourceTree = "<group>"; };
+		2976F7F73941BFDB1F69AD57 /* LoanAdjustmentEventSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanAdjustmentEventSheet.swift; sourceTree = "<group>"; };
+		2BC6746E4CB0C59AE1FBE234 /* BatchLoanOCRImportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchLoanOCRImportSheet.swift; sourceTree = "<group>"; };
 		2CF4A42949EE6CCD1BB898F9 /* FinancialResilienceHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialResilienceHubView.swift; sourceTree = "<group>"; };
 		306AA440F01A06ADE073408F /* UserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
 		35986DE9E47FFB8D7AB666E4 /* Decimal+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Decimal+Helpers.swift"; sourceTree = "<group>"; };
@@ -96,6 +105,7 @@
 		47A25A9D2F9C050CD971A410 /* HealthBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthBadge.swift; sourceTree = "<group>"; };
 		4CD4504F0F9F7A855778752D /* MoneyFlow.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MoneyFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5965522D496ABCA5EDC28942 /* LoanRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanRow.swift; sourceTree = "<group>"; };
+		612D9779C650DD9EA5AC5772 /* LoanAdjustmentEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanAdjustmentEngineTests.swift; sourceTree = "<group>"; };
 		6168CAFB5E98ACF255302976 /* Loan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loan.swift; sourceTree = "<group>"; };
 		6294614F51BA86268B782BC2 /* AppMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMotion.swift; sourceTree = "<group>"; };
 		654CC8352F1BD78450FF6559 /* RepaymentCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepaymentCalculatorTests.swift; sourceTree = "<group>"; };
@@ -120,6 +130,7 @@
 		D006EBAE0C1DD4BA92BB8E29 /* CashAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccount.swift; sourceTree = "<group>"; };
 		D1FA23D19A6867F6AC1A2832 /* CFPPlanningEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CFPPlanningEngineTests.swift; sourceTree = "<group>"; };
 		D39CAA70886D499BAEB1BE18 /* FinancialInputParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialInputParser.swift; sourceTree = "<group>"; };
+		D955BF35DDA3E0668E845528 /* LoanAdjustmentEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanAdjustmentEvent.swift; sourceTree = "<group>"; };
 		DAC795D51963B5FD8D6A7980 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E0ECCE97A175472DCA3D7760 /* PersistenceRecoveryCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceRecoveryCoordinator.swift; sourceTree = "<group>"; };
 		E39E077A521B371DEA7AAAD9 /* CashAccountForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccountForm.swift; sourceTree = "<group>"; };
@@ -129,6 +140,7 @@
 		EC61CAD9B1F984EE525E56C1 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		ECC571A50F746802EB286991 /* LoanDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanDetailView.swift; sourceTree = "<group>"; };
 		EDE0A0C49833DCF3A540CC90 /* FinancialStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialStatusCard.swift; sourceTree = "<group>"; };
+		F1098F2D6CF3A5BA5C58BF4D /* LoanOCRParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanOCRParserTests.swift; sourceTree = "<group>"; };
 		F40DFCDA1EAAABEBFCF8CD34 /* RepaymentCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepaymentCalculator.swift; sourceTree = "<group>"; };
 		F950500787322C91030B3E7C /* CreditCardForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardForm.swift; sourceTree = "<group>"; };
 		FFBF7A09A50020B705870E57 /* DynamicCashFlowSandboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicCashFlowSandboxView.swift; sourceTree = "<group>"; };
@@ -150,6 +162,8 @@
 			isa = PBXGroup;
 			children = (
 				D1FA23D19A6867F6AC1A2832 /* CFPPlanningEngineTests.swift */,
+				612D9779C650DD9EA5AC5772 /* LoanAdjustmentEngineTests.swift */,
+				F1098F2D6CF3A5BA5C58BF4D /* LoanOCRParserTests.swift */,
 				654CC8352F1BD78450FF6559 /* RepaymentCalculatorTests.swift */,
 			);
 			path = MoneyFlowTests;
@@ -217,9 +231,11 @@
 		76C4A5C4AADF04A94F50FB76 /* Liabilities */ = {
 			isa = PBXGroup;
 			children = (
+				2BC6746E4CB0C59AE1FBE234 /* BatchLoanOCRImportSheet.swift */,
 				F950500787322C91030B3E7C /* CreditCardForm.swift */,
 				BB470C46762E016E55975FED /* CreditCardRow.swift */,
 				7285206845FE1FD7E015AD18 /* LiabilitiesTab.swift */,
+				2976F7F73941BFDB1F69AD57 /* LoanAdjustmentEventSheet.swift */,
 				ECC571A50F746802EB286991 /* LoanDetailView.swift */,
 				83F4F30961AB1646749AB3D7 /* LoanForm.swift */,
 				5965522D496ABCA5EDC28942 /* LoanRow.swift */,
@@ -286,6 +302,7 @@
 				68BC1AF1213334C24325C22A /* CreditCard.swift */,
 				EAB1790C9FE77169DB684C05 /* FinancialGoal.swift */,
 				6168CAFB5E98ACF255302976 /* Loan.swift */,
+				D955BF35DDA3E0668E845528 /* LoanAdjustmentEvent.swift */,
 				A7449381E34DC0BE137740A5 /* PlanningScenario.swift */,
 				306AA440F01A06ADE073408F /* UserSettings.swift */,
 			);
@@ -300,6 +317,7 @@
 				44AA8E1662F2105941AE3EEA /* FinancialDataExport.swift */,
 				D39CAA70886D499BAEB1BE18 /* FinancialInputParser.swift */,
 				0F88453924D4CE7C1A773123 /* FinancialPresentation.swift */,
+				155180D9E16BECCA6A34254E /* LoanOCRScannerService.swift */,
 				A12246B3066447E769BBE68B /* MultiGoalEngine.swift */,
 				F40DFCDA1EAAABEBFCF8CD34 /* RepaymentCalculator.swift */,
 				92068B5742CA987B0D04B7A8 /* RiskAnalyzer.swift */,
@@ -434,6 +452,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A615B85507A25EF367710BC9 /* CFPPlanningEngineTests.swift in Sources */,
+				75B555718DB3225BAEEA8B2B /* LoanAdjustmentEngineTests.swift in Sources */,
+				097BD25203A4D15DA932BAF2 /* LoanOCRParserTests.swift in Sources */,
 				52B9DE56A4E8F41FC69581F0 /* RepaymentCalculatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -452,6 +472,7 @@
 			files = (
 				E5D9FBEA2B760E8B1A41F031 /* AppMotion.swift in Sources */,
 				889CA29559AA25A4494006C0 /* AssetsTab.swift in Sources */,
+				CC28737A9C72FBDF96B7EBA6 /* BatchLoanOCRImportSheet.swift in Sources */,
 				E882F5F0980A9A30D21B20D2 /* CashAccount.swift in Sources */,
 				BBFAB65FB8262294088C9E20 /* CashAccountForm.swift in Sources */,
 				6E22AF2955D0D4AD53024E67 /* CashAccountRow.swift in Sources */,
@@ -481,8 +502,11 @@
 				FD6111CEFC6D8610710B7206 /* HealthBadge.swift in Sources */,
 				1B228D33AB09E62F08920EDB /* LiabilitiesTab.swift in Sources */,
 				227CC344351F7BA8537A4EF9 /* Loan.swift in Sources */,
+				A6B18E9F2C4FBF160B578C8A /* LoanAdjustmentEvent.swift in Sources */,
+				2F8E462B3F30DB1B031BC425 /* LoanAdjustmentEventSheet.swift in Sources */,
 				3B2CD2BAC7B759D91D34BEE4 /* LoanDetailView.swift in Sources */,
 				C8D3E17CFD9D2F0567C5CBE4 /* LoanForm.swift in Sources */,
+				6E3EB112D5ABB265D13089B6 /* LoanOCRScannerService.swift in Sources */,
 				AA083839B21AFB2A35EBA34E /* LoanRow.swift in Sources */,
 				847E7C2F877977ED0B9840E6 /* MoneyFlowApp.swift in Sources */,
 				00E5AA23CADF40298A561A20 /* MultiGoalEngine.swift in Sources */,

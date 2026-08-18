@@ -10,6 +10,9 @@ struct LoanDetailView: View {
 
     @State private var showingEditSheet = false
     @State private var showingFullSchedule = false
+    @State private var showingEventSheet = false
+    @State private var eventSheetDefaultType: AdjustmentType = .rateAdjustment
+    @State private var eventToEdit: LoanAdjustmentEvent? = nil
     @State private var cachedSummary: RepaymentSummary?
     @State private var undoAction: UndoAction?
     @State private var errorMessage: String?
@@ -18,11 +21,20 @@ struct LoanDetailView: View {
     private var summary: RepaymentSummary { cachedSummary ?? calculateSummary() }
 
     private var calculationKey: String {
-        [
+        let eventsKey = loan.adjustmentEvents.map { "\($0.id)-\($0.updatedAt.timeIntervalSince1970)" }.joined(separator: ",")
+        return [
             String(loan.totalAmount), String(loan.annualRate), String(loan.totalPeriods),
             loan.repaymentMethod.rawValue, String(loan.startDate.timeIntervalSince1970),
-            String(loan.paymentDayOfMonth)
+            String(loan.paymentDayOfMonth), eventsKey
         ].joined(separator: "|")
+    }
+
+    private var savingsBannerSubtext: String {
+        var text = "历次变更已累计为您节省利息 \(summary.cumulativeInterestSaved.formattedCurrencyCompact)"
+        if summary.monthsAheadSaved > 0 {
+            text += " · 提前 \(summary.monthsAheadSaved) 个月结清"
+        }
+        return text
     }
 
     private var displayedSchedule: [RepaymentScheduleItem] {
@@ -33,8 +45,21 @@ struct LoanDetailView: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
+                // 1. 累计省息勋章 Banner
+                if summary.cumulativeInterestSaved > 0 || summary.monthsAheadSaved > 0 {
+                    savingsAchievementBanner
+                }
+
+                // 2. 核心概览卡片
                 overviewCard
+
+                // 3. 还款进度卡片
                 progressCard
+
+                // 4. 调息与提前还款时间轴卡片 (Adjustment Timeline)
+                adjustmentTimelineCard
+
+                // 5. 分段自适应还款计划表
                 scheduleCard
             }
             .padding()
@@ -48,6 +73,13 @@ struct LoanDetailView: View {
             }
         }
         .sheet(isPresented: $showingEditSheet) { LoanForm(loanToEdit: loan) }
+        .sheet(isPresented: $showingEventSheet) {
+            LoanAdjustmentEventSheet(
+                loan: loan,
+                eventToEdit: eventToEdit,
+                defaultType: eventSheetDefaultType
+            )
+        }
         .safeAreaInset(edge: .bottom) {
             if let undoAction {
                 UndoBanner(action: undoAction) { dismissUndo() }
@@ -62,6 +94,37 @@ struct LoanDetailView: View {
         .sensoryFeedback(.success, trigger: paymentFeedback)
     }
 
+    // MARK: - 累计省息成就勋章
+    private var savingsAchievementBanner: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "sparkles")
+                .font(.title2)
+                .foregroundStyle(.yellow)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("分段调息与提前还款效果显著")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white)
+
+                Text(savingsBannerSubtext)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.92))
+            }
+
+            Spacer()
+        }
+        .padding(12)
+        .background(
+            LinearGradient(
+                colors: [Color.orange, Color.red.opacity(0.85)],
+                startPoint: .leading,
+                endPoint: .trailing
+            ),
+            in: RoundedRectangle(cornerRadius: 14)
+        )
+    }
+
+    // MARK: - 核心概览卡片
     private var overviewCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 12) {
@@ -69,7 +132,7 @@ struct LoanDetailView: View {
                     .font(.title2)
                     .foregroundStyle(.white)
                     .frame(width: 48, height: 48)
-                    .background(loan.annualRate <= rateThreshold ? Color.appHealthyDebt : Color.appWarningDebt)
+                    .background(loan.latestAnnualRate <= rateThreshold ? Color.appHealthyDebt : Color.appWarningDebt)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .accessibilityHidden(true)
 
@@ -77,7 +140,7 @@ struct LoanDetailView: View {
                     Text(loan.name)
                         .font(.title3.bold())
                     HStack {
-                        HealthBadge(annualRate: loan.annualRate, threshold: rateThreshold)
+                        HealthBadge(annualRate: loan.latestAnnualRate, threshold: rateThreshold)
                         Text(loan.category.rawValue)
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -99,10 +162,11 @@ struct LoanDetailView: View {
     @ViewBuilder
     private var overviewMetrics: some View {
         metric("剩余本金", loan.remainingPrincipal.formattedCurrencyCompact, .primary)
-        metric("当前月供", loan.monthlyPayment.formattedCurrencyCompact, .appLiability)
-        metric("年化利率", String(format: "%.2f%%", loan.annualRate * 100), .primary)
+        metric("当前月供", summary.currentMonthlyPayment.formattedCurrencyCompact, .appLiability)
+        metric("当前利率", loan.latestAnnualRate.formattedRatePercentage, .primary)
     }
 
+    // MARK: - 进度卡片
     private var progressCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -115,7 +179,7 @@ struct LoanDetailView: View {
                     .animation(AppMotion.animation(for: .momentum, reduceMotion: reduceMotion), value: loan.progress)
             }
             ProgressView(value: loan.progress)
-                .tint(loan.annualRate <= rateThreshold ? Color.appHealthyDebt : Color.appWarningDebt)
+                .tint(loan.latestAnnualRate <= rateThreshold ? Color.appHealthyDebt : Color.appWarningDebt)
                 .animation(AppMotion.animation(for: .momentum, reduceMotion: reduceMotion), value: loan.progress)
                 .accessibilityLabel("还款进度")
                 .accessibilityValue("已还 \(loan.paidPeriods) 期，共 \(loan.totalPeriods) 期")
@@ -139,13 +203,161 @@ struct LoanDetailView: View {
         .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 16))
     }
 
+    // MARK: - 调息与还贷变更时间轴 (Adjustment Timeline Card)
+    private var adjustmentTimelineCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("变更记录与时间轴")
+                        .font(.headline)
+                    Text("调息与提前还款事件流水")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                HStack(spacing: 8) {
+                    Button {
+                        eventToEdit = nil
+                        eventSheetDefaultType = .prepayment
+                        showingEventSheet = true
+                    } label: {
+                        Label("提前还款", systemImage: "bolt.fill")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.orange)
+
+                    Button {
+                        eventToEdit = nil
+                        eventSheetDefaultType = .rateAdjustment
+                        showingEventSheet = true
+                    } label: {
+                        Label("调整利率", systemImage: "chart.line.uptrend.xyaxis")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.blue)
+                }
+            }
+
+            Divider()
+
+            if loan.adjustmentEvents.isEmpty {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 6) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.title2)
+                            .foregroundStyle(.tertiary)
+                        Text("暂无调息或提前还款记录")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text("点击上方按钮可随时补录历史调息或提前还款")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 8)
+                    Spacer()
+                }
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(loan.sortedAdjustmentEvents) { event in
+                        timelineEventRow(event)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func timelineEventRow(_ event: LoanAdjustmentEvent) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Circle()
+                .fill(event.type.themeColor)
+                .frame(width: 8, height: 8)
+                .padding(.top, 5)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(event.date.yearMonthDayString)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.primary)
+
+                    Text("第 \(event.periodIndex) 期")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button {
+                        eventToEdit = event
+                        showingEventSheet = true
+                    } label: {
+                        Image(systemName: "pencil")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.borderless)
+
+                    Button(role: .destructive) {
+                        deleteEvent(event)
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.caption2)
+                            .foregroundStyle(.red)
+                    }
+                    .buttonStyle(.borderless)
+                }
+
+                if event.type == .rateAdjustment {
+                    Text("利率调至 \((event.newAnnualRate ?? 0).formattedRatePercentage)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.blue)
+                } else {
+                    HStack(spacing: 4) {
+                        Text("提前还本 \((event.prepaymentAmount ?? 0).formattedCurrencyCompact)")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.orange)
+                        Text("(\(event.prepaymentEffect.shortTitle))")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if !event.note.isEmpty {
+                    Text(event.note)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+        }
+        .padding(8)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private func deleteEvent(_ event: LoanAdjustmentEvent) {
+        withAnimation {
+            if let idx = loan.adjustmentEvents.firstIndex(where: { $0.id == event.id }) {
+                loan.adjustmentEvents.remove(at: idx)
+            }
+            modelContext.delete(event)
+            loan.updatedAt = Date()
+            try? modelContext.save()
+            cachedSummary = calculateSummary()
+        }
+    }
+
+    // MARK: - 分段还款计划表卡片
     private var scheduleCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(showingFullSchedule ? "完整还款计划" : "接下来12期")
+                    Text(showingFullSchedule ? "完整分段计划" : "接下来12期")
                         .font(.headline)
-                    Text("月供为主信息，本金与利息可展开查看")
+                    Text("按历次调息与还贷自适应重排")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -196,12 +408,13 @@ struct LoanDetailView: View {
             totalPeriods: loan.totalPeriods,
             method: loan.repaymentMethod,
             startDate: loan.startDate,
-            paymentDay: loan.paymentDayOfMonth
+            paymentDay: loan.paymentDayOfMonth,
+            events: loan.adjustmentEvents
         )
     }
 
     private func completePayment() {
-        guard loan.paidPeriods < loan.totalPeriods else { return }
+        guard loan.paidPeriods < summary.schedule.count else { return }
         let previousPaid = loan.paidPeriods
         let previousPrincipal = loan.remainingPrincipal
         let previousInterest = loan.totalInterestPaid
@@ -263,9 +476,13 @@ private struct ScheduleRowView: View {
     var body: some View {
         DisclosureGroup(isExpanded: $expanded.animation(AppMotion.animation(for: .spatial, reduceMotion: reduceMotion))) {
             VStack(spacing: 8) {
+                LabeledContent("执行年化利率", value: item.annualRate.formattedRatePercentage)
                 LabeledContent("偿还本金", value: item.principal.formattedCurrency)
                 LabeledContent("支付利息", value: item.interest.formattedCurrency)
-                LabeledContent("还款后本金", value: item.remainingPrincipal.formattedCurrency)
+                if item.prepaymentAmount > 0 {
+                    LabeledContent("当期额外提前还本", value: item.prepaymentAmount.formattedCurrency)
+                }
+                LabeledContent("还款后剩余本金", value: item.remainingPrincipal.formattedCurrency)
             }
             .font(.caption)
             .monospacedDigit()
@@ -277,8 +494,18 @@ private struct ScheduleRowView: View {
                     .contentTransition(.symbolEffect(.replace))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("第 \(item.period) 期")
-                        .fontWeight(isCurrent ? .bold : .regular)
+                    HStack(spacing: 4) {
+                        Text("第 \(item.period) 期")
+                            .fontWeight(isCurrent ? .bold : .regular)
+                        if let badge = item.adjustmentBadge {
+                            Text(badge)
+                                .font(.system(size: 9, weight: .bold))
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(Color.orange.opacity(0.15), in: Capsule())
+                                .foregroundStyle(.orange)
+                        }
+                    }
                     Text(item.paymentDate.yearMonthDayString)
                         .font(.caption)
                         .foregroundStyle(.secondary)

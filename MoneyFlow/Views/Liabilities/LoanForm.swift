@@ -14,8 +14,8 @@ struct LoanForm: View {
     @State private var monthlyPaymentText = ""
     @State private var annualRatePercentText = ""
     @State private var repaymentMethod: RepaymentMethod = .equalPayment
-    @State private var totalPeriods = 360
-    @State private var paidPeriods = 0
+    @State private var totalPeriodsText = "360"
+    @State private var paidPeriodsText = "0"
     @State private var paymentDayOfMonth = 10
     @State private var startDate = Date()
     @State private var note = ""
@@ -24,17 +24,25 @@ struct LoanForm: View {
     @State private var saveSucceeded = false
     @FocusState private var focusedField: Field?
 
-    private enum Field: Hashable { case name, remaining, payment, rate, total, note }
+    private enum Field: Hashable { case name, remaining, payment, rate, total, totalPeriods, paidPeriods, note }
     private var isEditing: Bool { loanToEdit != nil }
+
+    private var parsedTotalPeriods: Int {
+        Int(totalPeriodsText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 360
+    }
+
+    private var parsedPaidPeriods: Int {
+        Int(paidPeriodsText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+    }
 
     private var estimatedMonthlyPayment: Double {
         guard let total = FinancialInputParser.number(from: totalAmountText),
               let ratePercent = FinancialInputParser.number(from: annualRatePercentText),
-              total > 0, totalPeriods > 0 else { return 0 }
+              total > 0, parsedTotalPeriods > 0 else { return 0 }
         return RepaymentCalculator.calculateSchedule(
             principal: total,
             annualRate: ratePercent / 100,
-            totalPeriods: totalPeriods,
+            totalPeriods: parsedTotalPeriods,
             method: repaymentMethod,
             startDate: startDate,
             paymentDay: paymentDayOfMonth
@@ -80,8 +88,44 @@ struct LoanForm: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        Stepper("总期数：\(totalPeriods) 期", value: $totalPeriods, in: 1...480)
-                        Stepper("已还：\(paidPeriods) 期", value: $paidPeriods, in: 0...totalPeriods)
+                        // 手工输入总期数与 Stepper 微调联动
+                        HStack {
+                            Text("总期数")
+                            Spacer()
+                            TextField("360", text: $totalPeriodsText)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 80)
+                                .focused($focusedField, equals: .totalPeriods)
+                            Text("期")
+                                .foregroundStyle(.secondary)
+
+                            Stepper("", value: Binding(
+                                get: { parsedTotalPeriods },
+                                set: { totalPeriodsText = String(max(1, min(600, $0))) }
+                            ), in: 1...600)
+                            .labelsHidden()
+                        }
+
+                        // 手工输入已还期数与 Stepper 微调联动
+                        HStack {
+                            Text("已还期数")
+                            Spacer()
+                            TextField("0", text: $paidPeriodsText)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 80)
+                                .focused($focusedField, equals: .paidPeriods)
+                            Text("期")
+                                .foregroundStyle(.secondary)
+
+                            Stepper("", value: Binding(
+                                get: { parsedPaidPeriods },
+                                set: { paidPeriodsText = String(max(0, min(parsedTotalPeriods, $0))) }
+                            ), in: 0...max(1, parsedTotalPeriods))
+                            .labelsHidden()
+                        }
+
                         DatePicker("起始日期", selection: $startDate, displayedComponents: .date)
 
                         if estimatedMonthlyPayment > 0 {
@@ -95,7 +139,7 @@ struct LoanForm: View {
                             .focused($focusedField, equals: .note)
                     }
                 } footer: {
-                    Text("快速记录用于现金压力判断；展开后可生成更精确的完整还款计划。")
+                    Text("快速记录用于现金压力判断；展开后可手工输入期数生成更精确的完整还款计划。")
                 }
 
                 if let validationMessage {
@@ -143,18 +187,18 @@ struct LoanForm: View {
         totalAmountText = numberText(loan.totalAmount)
         remainingPrincipalText = numberText(loan.remainingPrincipal)
         monthlyPaymentText = numberText(loan.monthlyPayment)
-        annualRatePercentText = numberText(loan.annualRate * 100)
+        annualRatePercentText = numberText(loan.annualRate * 100, maxFractions: 4)
         repaymentMethod = loan.repaymentMethod
-        totalPeriods = loan.totalPeriods
-        paidPeriods = loan.paidPeriods
+        totalPeriodsText = String(loan.totalPeriods)
+        paidPeriodsText = String(loan.paidPeriods)
         paymentDayOfMonth = loan.paymentDayOfMonth
         startDate = loan.startDate
         note = loan.note
         showsPreciseDetails = true
     }
 
-    private func numberText(_ value: Double) -> String {
-        value.formatted(.number.precision(.fractionLength(0...2)))
+    private func numberText(_ value: Double, maxFractions: Int = 2) -> String {
+        value.formatted(.number.precision(.fractionLength(0...maxFractions)))
     }
 
     private func save() {
@@ -172,6 +216,8 @@ struct LoanForm: View {
               let monthlyPayment = FinancialInputParser.number(from: monthlyPaymentText),
               let ratePercent = FinancialInputParser.number(from: annualRatePercentText) else { return }
 
+        let totalPeriods = max(1, parsedTotalPeriods)
+        let paidPeriods = max(0, min(totalPeriods, parsedPaidPeriods))
         let totalAmount = FinancialInputParser.number(from: totalAmountText) ?? remainingPrincipal
         let annualRate = ratePercent / 100
         let endDate = Calendar.current.date(byAdding: .month, value: max(1, totalPeriods - paidPeriods), to: Date()) ?? Date()

@@ -265,7 +265,8 @@ enum CashFlowProjector {
                 totalPeriods: loan.totalPeriods,
                 method: loan.repaymentMethod,
                 startDate: loan.startDate,
-                paymentDay: loan.paymentDayOfMonth
+                paymentDay: loan.paymentDayOfMonth,
+                events: loan.adjustmentEvents
             )
             return (loan, summary.schedule)
         }

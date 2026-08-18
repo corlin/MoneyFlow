@@ -21,18 +21,29 @@ struct FinancialDataExport: Transferable {
         let snapshot = Snapshot(
             exportedAt: Date(),
             accounts: accounts.map { .init(name: $0.name, balance: $0.balance, icon: $0.icon, note: $0.note) },
-            loans: loans.map {
+            loans: loans.map { loan in
                 .init(
-                    name: $0.name,
-                    category: $0.category.rawValue,
-                    totalAmount: $0.totalAmount,
-                    remainingPrincipal: $0.remainingPrincipal,
-                    annualRate: $0.annualRate,
-                    repaymentMethod: $0.repaymentMethod.rawValue,
-                    totalPeriods: $0.totalPeriods,
-                    paidPeriods: $0.paidPeriods,
-                    monthlyPayment: $0.monthlyPayment,
-                    paymentDay: $0.paymentDayOfMonth
+                    name: loan.name,
+                    category: loan.category.rawValue,
+                    totalAmount: loan.totalAmount,
+                    remainingPrincipal: loan.remainingPrincipal,
+                    annualRate: loan.annualRate,
+                    repaymentMethod: loan.repaymentMethod.rawValue,
+                    totalPeriods: loan.totalPeriods,
+                    paidPeriods: loan.paidPeriods,
+                    monthlyPayment: loan.monthlyPayment,
+                    paymentDay: loan.paymentDayOfMonth,
+                    adjustmentEvents: loan.adjustmentEvents.map {
+                        .init(
+                            date: $0.date,
+                            periodIndex: $0.periodIndex,
+                            type: $0.type.rawValue,
+                            newAnnualRate: $0.newAnnualRate,
+                            prepaymentAmount: $0.prepaymentAmount,
+                            prepaymentEffect: $0.prepaymentEffect.rawValue,
+                            note: $0.note
+                        )
+                    }
                 )
             },
             cards: cards.map {
@@ -82,6 +93,17 @@ struct FinancialDataExport: Transferable {
         let paidPeriods: Int
         let monthlyPayment: Double
         let paymentDay: Int
+        let adjustmentEvents: [LoanAdjustmentSnapshot]?
+    }
+
+    private struct LoanAdjustmentSnapshot: Codable {
+        let date: Date
+        let periodIndex: Int
+        let type: String
+        let newAnnualRate: Double?
+        let prepaymentAmount: Double?
+        let prepaymentEffect: String?
+        let note: String
     }
 
     private struct Card: Codable {

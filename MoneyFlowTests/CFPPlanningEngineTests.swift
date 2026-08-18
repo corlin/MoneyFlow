@@ -236,7 +236,7 @@ final class CFPPlanningEngineTests: XCTestCase {
 
     @MainActor
     func testDemoDataServiceLoadsBothPersonas() throws {
-        let schema = Schema([CashAccount.self, Loan.self, CreditCard.self, UserSettings.self, FinancialGoal.self])
+        let schema = Schema([CashAccount.self, Loan.self, CreditCard.self, UserSettings.self, FinancialGoal.self, LoanAdjustmentEvent.self])
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: schema, configurations: [configuration])
         let context = container.mainContext
