@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+
+# Local configuration
+.env
+.env.*
+
+# Local migration and debugging scratch files
+/refactor.js
+/refactor.sh
+/refactor2.js
+/refactor_decimal.py
+/test_schema.swift
+/test_swiftdata.swift
+/test_swiftdata2.swift

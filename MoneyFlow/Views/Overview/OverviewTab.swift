@@ -1,0 +1,208 @@
+import SwiftUI
+import SwiftData
+
+struct OverviewTab: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Query private var accounts: [CashAccount]
+    @Query private var loans: [Loan]
+    @Query private var creditCards: [CreditCard]
+    @Query private var userSettingsList: [UserSettings]
+
+    @State private var settingsToEdit: UserSettings?
+    @State private var showingAddChooser = false
+    @State private var showingAddAssetSheet = false
+    @State private var showingAddLoanSheet = false
+    @State private var showingAddCreditCardSheet = false
+    @State private var loanToOpen: Loan?
+    @State private var creditCardToEdit: CreditCard?
+    @State private var demoError: String?
+    @State private var demoLoaded = false
+
+    private var settings: UserSettings? { userSettingsList.first }
+    private var rateThreshold: Double { settings?.rateThreshold ?? 0.05 }
+    private var warningRatio: Double { settings?.cashFlowWarningRatio ?? 0.70 }
+    private var monthlyIncome: Double { settings?.monthlyEstimatedIncome ?? 0 }
+    private var totalCash: Double { accounts.reduce(0) { $0 + $1.balance } }
+    private var hasAnyData: Bool { !accounts.isEmpty || !loans.isEmpty || !creditCards.isEmpty }
+
+    private var debtAnalysis: DebtHealthAnalysis {
+        RiskAnalyzer.analyze(
+            cashAccounts: accounts,
+            loans: loans,
+            creditCards: creditCards,
+            rateThreshold: rateThreshold
+        )
+    }
+
+    private var projections: [MonthlyCashFlowItem] {
+        CashFlowProjector.projectCashFlow(
+            initialCash: totalCash,
+            loans: loans,
+            creditCards: creditCards,
+            warningRatio: warningRatio,
+            monthsCount: 12,
+            monthlyIncome: monthlyIncome
+        )
+    }
+
+    private var reminders: [UpcomingPaymentReminder] {
+        RiskAnalyzer.getUpcomingReminders(
+            loans: loans,
+            creditCards: creditCards,
+            daysAhead: 30
+        )
+    }
+
+    private var liquiditySummary: LiquidityBufferSummary {
+        LiquidityBufferSummary.make(items: projections, monthlyIncome: monthlyIncome)
+    }
+
+    private var debtProgressSummary: DebtProgressSummary {
+        DebtProgressSummary.make(loans: loans, creditCards: creditCards)
+    }
+
+    private var upcomingPaymentSummary: UpcomingPaymentSummary {
+        UpcomingPaymentSummary.make(reminders: reminders)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                if hasAnyData {
+                    populatedOverview
+                } else {
+                    onboarding
+                }
+            }
+            .background(Color.appBackground)
+            .navigationTitle("概览")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: prepareSettingsAndShow) {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("设置")
+                }
+            }
+            .confirmationDialog("添加第一笔数据", isPresented: $showingAddChooser, titleVisibility: .visible) {
+                Button("添加资产", systemImage: "banknote") { showingAddAssetSheet = true }
+                Button("添加贷款", systemImage: "house") { showingAddLoanSheet = true }
+                Button("添加信用卡", systemImage: "creditcard") { showingAddCreditCardSheet = true }
+                Button("取消", role: .cancel) {}
+            } message: {
+                Text("选择最方便的一项开始，其余内容以后随时可以补充。")
+            }
+            .sheet(item: $settingsToEdit) { SettingsView(settings: $0) }
+            .sheet(isPresented: $showingAddAssetSheet) { CashAccountForm() }
+            .sheet(isPresented: $showingAddLoanSheet) { LoanForm() }
+            .sheet(isPresented: $showingAddCreditCardSheet) { CreditCardForm() }
+            .sheet(item: $loanToOpen) { loan in
+                NavigationStack { LoanDetailView(loan: loan, rateThreshold: rateThreshold) }
+            }
+            .sheet(item: $creditCardToEdit) { CreditCardForm(cardToEdit: $0) }
+            .alert("无法载入示例", isPresented: Binding(
+                get: { demoError != nil },
+                set: { if !$0 { demoError = nil } }
+            )) {
+                Button("好", role: .cancel) {}
+            } message: {
+                Text(demoError ?? "未知错误")
+            }
+            .sensoryFeedback(.success, trigger: demoLoaded)
+        }
+    }
+
+    private var populatedOverview: some View {
+        LazyVStack(spacing: 16) {
+            LiquidityBufferCard(summary: liquiditySummary)
+            CashFlowChart(items: projections, assumptions: .default)
+            if !loans.isEmpty || !creditCards.isEmpty {
+                DebtProgressCard(
+                    summary: debtProgressSummary,
+                    netCashPosition: debtAnalysis.netCashPosition
+                )
+                UpcomingPaymentsCard(summary: upcomingPaymentSummary, onSelect: openPaymentSource)
+                DebtHealthCard(analysis: debtAnalysis, rateThreshold: rateThreshold)
+            }
+        }
+        .padding()
+    }
+
+    private var onboarding: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "chart.line.uptrend.xyaxis")
+                .font(.system(size: 42, weight: .semibold))
+                .foregroundStyle(Color.appPrimary)
+                .symbolRenderingMode(.hierarchical)
+                .accessibilityHidden(true)
+
+            VStack(spacing: 8) {
+                Text("看清未来还款压力")
+                    .font(.title2.bold())
+                Text("记录一笔资产或负债，查看近期应还金额和现金余量。")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            VStack(spacing: 12) {
+                Button {
+                    showingAddChooser = true
+                } label: {
+                    Label("添加第一笔数据", systemImage: "plus")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+
+                Button(action: loadDemoData) {
+                    Label("载入示例体验", systemImage: "wand.and.stars")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+            }
+
+            Label("数据仅保存在这台设备上", systemImage: "lock.fill")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: 520)
+        .padding(.horizontal, 28)
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity)
+    }
+
+    private func loadDemoData() {
+        do {
+            try DemoDataService.load(into: modelContext, replacingExisting: false)
+            withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.38, dampingFraction: 1)) {
+                demoLoaded.toggle()
+            }
+        } catch {
+            demoError = error.localizedDescription
+        }
+    }
+
+    private func prepareSettingsAndShow() {
+        if let settings {
+            settingsToEdit = settings
+        } else {
+            let created = UserSettings()
+            modelContext.insert(created)
+            settingsToEdit = created
+        }
+    }
+
+    private func openPaymentSource(_ reminder: UpcomingPaymentReminder) {
+        guard let sourceID = reminder.sourceID else { return }
+        if reminder.isLoan {
+            loanToOpen = loans.first { $0.id == sourceID }
+        } else {
+            creditCardToEdit = creditCards.first { $0.id == sourceID }
+        }
+    }
+}
