@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct GoalCardView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let item: GoalProjectionItem
     var onEdit: () -> Void
     var onDelete: () -> Void
@@ -8,14 +9,18 @@ struct GoalCardView: View {
     private var goal: FinancialGoal { item.goal }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             // 头部：图标、名称与优先级
-            HStack(alignment: .top) {
+            HStack(alignment: .top, spacing: 10) {
                 Image(systemName: goal.category.systemImage)
-                    .font(.title3)
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(goal.category.themeColor)
-                    .frame(width: 32, height: 32)
-                    .background(goal.category.themeColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                    .frame(width: 36, height: 36)
+                    .background(goal.category.themeColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .strokeBorder(goal.category.themeColor.opacity(0.20), lineWidth: 0.5)
+                    )
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(goal.name)
@@ -28,14 +33,14 @@ struct GoalCardView: View {
                             .foregroundStyle(.secondary)
 
                         Text("•")
-                            .font(.caption2)
+                            .font(.system(size: 8))
                             .foregroundStyle(.tertiary)
 
                         Text(goal.priority.shortTitle)
-                            .font(.caption2.weight(.medium))
+                            .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(priorityColor(goal.priority))
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 1)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
                             .background(priorityColor(goal.priority).opacity(0.12), in: Capsule())
                     }
                 }
@@ -51,10 +56,10 @@ struct GoalCardView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .font(.body)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
-                        .padding(6)
-                        .contentShape(Rectangle())
+                        .frame(width: 28, height: 28)
+                        .background(Color(.tertiarySystemGroupedBackground), in: Circle())
                 }
             }
 
@@ -66,6 +71,8 @@ struct GoalCardView: View {
                         .foregroundStyle(.secondary)
                     Text(item.projectedTotal.formattedCurrency())
                         .font(.system(.title3, design: .rounded, weight: .bold))
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
                         .foregroundStyle(.primary)
                 }
 
@@ -81,7 +88,7 @@ struct GoalCardView: View {
                 }
             }
 
-            // 三段式资金进度条
+            // 流体三段式资金胶囊进度条
             MultiSegmentProgressBar(
                 earmarkedRatio: item.earmarkedProgressRatio,
                 irrigationRatio: item.irrigationProgressRatio,
@@ -114,10 +121,13 @@ struct GoalCardView: View {
 
                 Text("\(Int(item.progressRatio * 100))%")
                     .font(.caption.weight(.bold))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
                     .foregroundStyle(item.progressRatio >= 1.0 ? .green : .primary)
             }
 
             Divider()
+                .opacity(0.6)
 
             // 底部：预计达成期 ETA 与 状态标签
             HStack {
@@ -133,7 +143,11 @@ struct GoalCardView: View {
             }
         }
         .padding(14)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color(UIColor.separator).opacity(0.12), lineWidth: 0.5)
+        )
     }
 
     @ViewBuilder
@@ -142,9 +156,9 @@ struct GoalCardView: View {
             if let date = item.completionDate {
                 HStack(spacing: 4) {
                     Image(systemName: "flag.checkered")
-                        .font(.caption2)
+                        .font(.system(size: 10))
                     Text("预计 \(date.yearMonthString) 达成")
-                        .font(.caption.weight(.semibold))
+                        .font(.system(size: 11, weight: .semibold))
                 }
                 .foregroundStyle(.green)
                 .padding(.horizontal, 8)
@@ -153,9 +167,9 @@ struct GoalCardView: View {
             } else {
                 HStack(spacing: 4) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.caption2)
+                        .font(.system(size: 10))
                     Text("已足额达成")
-                        .font(.caption.weight(.semibold))
+                        .font(.system(size: 11, weight: .semibold))
                 }
                 .foregroundStyle(.green)
                 .padding(.horizontal, 8)
@@ -165,9 +179,9 @@ struct GoalCardView: View {
         } else if !item.isOnTrack && item.delayedMonths > 0 {
             HStack(spacing: 4) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.caption2)
+                    .font(.system(size: 10))
                 Text("预计延期 \(item.delayedMonths) 个月")
-                    .font(.caption.weight(.semibold))
+                    .font(.system(size: 11, weight: .semibold))
             }
             .foregroundStyle(.orange)
             .padding(.horizontal, 8)
@@ -176,9 +190,9 @@ struct GoalCardView: View {
         } else {
             HStack(spacing: 4) {
                 Image(systemName: "hourglass")
-                    .font(.caption2)
+                    .font(.system(size: 10))
                 Text("尚余缺口 \(item.remainingGap.formattedCurrency(style: .compact))")
-                    .font(.caption.weight(.medium))
+                    .font(.system(size: 11, weight: .medium))
             }
             .foregroundStyle(.secondary)
             .padding(.horizontal, 8)
@@ -196,8 +210,9 @@ struct GoalCardView: View {
     }
 }
 
-/// 三段式进度条组件
+/// 流体三段式胶囊进度条组件
 struct MultiSegmentProgressBar: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let earmarkedRatio: Double
     let irrigationRatio: Double
     let color: Color
@@ -210,27 +225,29 @@ struct MultiSegmentProgressBar: View {
 
             ZStack(alignment: .leading) {
                 // 背景槽
-                RoundedRectangle(cornerRadius: 4)
+                Capsule()
                     .fill(Color(.tertiarySystemFill))
-                    .frame(height: 8)
+                    .frame(height: 6)
 
                 HStack(spacing: 0) {
                     // 存量分账段
                     if earmarkedWidth > 0 {
-                        RoundedRectangle(cornerRadius: 4)
+                        Capsule()
                             .fill(color)
-                            .frame(width: earmarkedWidth, height: 8)
+                            .frame(width: max(3, earmarkedWidth), height: 6)
                     }
 
                     // 动态灌溉段
                     if irrigationWidth > 0 {
-                        RoundedRectangle(cornerRadius: 4)
+                        Capsule()
                             .fill(color.opacity(0.45))
-                            .frame(width: irrigationWidth, height: 8)
+                            .frame(width: max(3, irrigationWidth), height: 6)
                     }
                 }
             }
         }
-        .frame(height: 8)
+        .frame(height: 6)
+        .animation(AppMotion.animation(for: .momentum, reduceMotion: reduceMotion), value: earmarkedRatio + irrigationRatio)
     }
 }
+

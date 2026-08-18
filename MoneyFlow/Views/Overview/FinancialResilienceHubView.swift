@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct FinancialResilienceHubView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let analysis: DebtHealthAnalysis
     var onExplorePlanning: () -> Void
 
@@ -28,10 +29,11 @@ struct FinancialResilienceHubView: View {
         VStack(alignment: .leading, spacing: 16) {
             // 头部标题与状态徽章
             HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text("财务韧性与健康中枢")
                         .font(.headline)
                         .foregroundStyle(.primary)
+                        .tracking(-0.2)
                     Text("CFP 偿债承载力与流动性综合体检")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -39,21 +41,25 @@ struct FinancialResilienceHubView: View {
 
                 Spacer()
 
-                HStack(spacing: 4) {
+                HStack(spacing: 5) {
                     Circle()
                         .fill(dsrColor)
-                        .frame(width: 8, height: 8)
+                        .frame(width: 7, height: 7)
                     Text(analysis.dsrStatus.shortTitle)
-                        .font(.caption.weight(.bold))
+                        .font(.caption2.weight(.bold))
                         .foregroundStyle(dsrColor)
                 }
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 9)
                 .padding(.vertical, 4)
                 .background(dsrColor.opacity(0.12), in: Capsule())
+                .overlay(
+                    Capsule()
+                        .strokeBorder(dsrColor.opacity(0.20), lineWidth: 0.5)
+                )
             }
 
-            // 核心生命线三率 (Three Core Resilience Numbers)
-            HStack(spacing: 10) {
+            // 核心生命线三率 (Three Core Resilience Numbers) - 呼吸感指标格
+            HStack(spacing: 8) {
                 metricCell(
                     title: "应急储备",
                     value: "\(String(format: "%.1f", analysis.emergencyCoverageMonths))月",
@@ -82,10 +88,10 @@ struct FinancialResilienceHubView: View {
                     Image(systemName: insight.type.icon)
                         .font(.subheadline)
                         .foregroundStyle(insightColor(insight.type))
-                        .frame(width: 18)
+                        .frame(width: 20)
                         .padding(.top, 2)
 
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text(insight.title)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.primary)
@@ -99,13 +105,21 @@ struct FinancialResilienceHubView: View {
                     Spacer()
                 }
                 .padding(12)
-                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                .background(
+                    insightColor(insight.type).opacity(0.06),
+                    in: RoundedRectangle(cornerRadius: 12)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(insightColor(insight.type).opacity(0.15), lineWidth: 0.5)
+                )
             }
 
             Divider()
+                .opacity(0.6)
 
             // 底部净现金头寸与规划跳转
-            HStack {
+            HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("当前净现金头寸")
                         .font(.caption2)
@@ -113,51 +127,64 @@ struct FinancialResilienceHubView: View {
                     Text(analysis.netCashPosition.formattedCurrencyCompact)
                         .font(.subheadline.bold())
                         .monospacedDigit()
+                        .contentTransition(.numericText())
                         .foregroundStyle(analysis.netCashPosition < 0 ? Color.appWarningDebt : .primary)
                 }
 
                 Spacer()
 
                 Button(action: onExplorePlanning) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 5) {
                         Text("推演沙盘与目标")
                             .font(.caption.weight(.semibold))
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.caption)
                     }
                     .foregroundStyle(Color.accentColor)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.accentColor.opacity(0.10), in: Capsule())
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Color.accentColor.opacity(0.12), in: Capsule())
                 }
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.95, pressedOpacity: 0.8))
             }
         }
         .padding(16)
-        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(Color(UIColor.separator).opacity(0.15), lineWidth: 0.5)
+        )
     }
 
     private func metricCell(title: String, value: String, subtext: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
 
             Text(value)
-                .font(.system(.title3, design: .rounded, weight: .bold))
+                .font(.system(.title2, design: .rounded, weight: .bold))
+                .tracking(-0.3)
                 .foregroundStyle(color)
                 .monospacedDigit()
+                .contentTransition(.numericText())
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.75)
 
             Text(subtext)
-                .font(.caption2)
+                .font(.system(size: 10))
                 .foregroundStyle(.tertiary)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(10)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 10)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color(UIColor.separator).opacity(0.12), lineWidth: 0.5)
+        )
     }
 
     private func insightColor(_ type: InsightType) -> Color {
@@ -169,3 +196,4 @@ struct FinancialResilienceHubView: View {
         }
     }
 }
+

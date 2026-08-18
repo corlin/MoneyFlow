@@ -9,8 +9,8 @@ enum SandboxChartMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .balanceLine: return "现金余额走势"
-        case .waterfall: return "月度收支瀑布"
+        case .balanceLine: return "现金走势"
+        case .waterfall: return "收支瀑布"
         }
     }
 
@@ -45,21 +45,26 @@ struct DynamicCashFlowSandboxView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            // 头部：标题、情景重置与形态切换
+            // 头部：解耦布局 (Primary Header Bar)
             HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text("动态推演沙盘")
                             .font(.headline)
                             .foregroundStyle(.primary)
+                            .tracking(-0.2)
 
                         if scenario.isModifiedFromBaseline {
                             Text("情景模拟中")
-                                .font(.caption2.weight(.bold))
+                                .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.orange)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(Color.orange.opacity(0.15), in: Capsule())
+                                .background(Color.orange.opacity(0.12), in: Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(Color.orange.opacity(0.25), lineWidth: 0.5)
+                                )
                         }
                     }
                     Text("点选下方胶囊即刻观察曲线与目标形变")
@@ -69,36 +74,54 @@ struct DynamicCashFlowSandboxView: View {
 
                 Spacer()
 
-                if scenario.isModifiedFromBaseline {
-                    HStack(spacing: 8) {
-                        Button("还原") {
-                            withAnimation(.spring(duration: 0.25)) {
-                                scenario.reset()
-                            }
-                        }
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-
-                        Button("设为基准") {
-                            onCommitAsBaseline()
-                        }
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.accentColor)
-                    }
-                    .padding(.trailing, 4)
-                }
-
                 Picker("图表形态", selection: $chartMode) {
                     ForEach(SandboxChartMode.allCases) { mode in
                         Label(mode.title, systemImage: mode.systemImage).tag(mode)
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 150)
+                .frame(width: 140)
+            }
+
+            // 情景重置与固化条 (Contextual Action Bar)
+            if scenario.isModifiedFromBaseline {
+                HStack(spacing: 12) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+
+                    Text("当前处于情景假设模式")
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button("还原基准") {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            scenario.reset()
+                        }
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+
+                    Button("设为新基准") {
+                        onCommitAsBaseline()
+                    }
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.accentColor)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.orange.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(Color.orange.opacity(0.18), lineWidth: 0.5)
+                )
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
 
             // 核心推演图表区域
-            VStack(spacing: 8) {
+            VStack(spacing: 10) {
                 if chartMode == .balanceLine {
                     lineChartView
                 } else {
@@ -111,7 +134,11 @@ struct DynamicCashFlowSandboxView: View {
                 }
             }
             .padding(14)
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(Color(UIColor.separator).opacity(0.12), lineWidth: 0.5)
+            )
 
             // 原生轻量浮动胶囊控制手柄 (Floating Scenario Pills)
             floatingScenarioPills
@@ -129,7 +156,7 @@ struct DynamicCashFlowSandboxView: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color.blue.opacity(0.20), Color.blue.opacity(0.01)],
+                        colors: [Color.blue.opacity(0.15), Color.blue.opacity(0.01)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -140,7 +167,7 @@ struct DynamicCashFlowSandboxView: View {
                     y: .value("基准现金", item.endingCash)
                 )
                 .foregroundStyle(Color.blue)
-                .lineStyle(StrokeStyle(lineWidth: 2.5))
+                .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
 
                 PointMark(
                     x: .value("月份", item.monthLabel),
@@ -158,7 +185,7 @@ struct DynamicCashFlowSandboxView: View {
                         y: .value("情景现金", scenItem.endingCash)
                     )
                     .foregroundStyle(Color.orange)
-                    .lineStyle(StrokeStyle(lineWidth: 2.2, dash: [5, 4]))
+                    .lineStyle(StrokeStyle(lineWidth: 2.2, lineCap: .round, dash: [5, 4]))
 
                     PointMark(
                         x: .value("月份", scenItem.monthLabel),
@@ -176,7 +203,7 @@ struct DynamicCashFlowSandboxView: View {
             }
         }
         .chartXSelection(value: $selectedMonthLabel)
-        .frame(height: 180)
+        .frame(height: 185)
     }
 
     // MARK: - 瀑布收支柱状图 (Waterfall Chart)
@@ -212,12 +239,12 @@ struct DynamicCashFlowSandboxView: View {
             }
         }
         .chartXSelection(value: $selectedMonthLabel)
-        .frame(height: 180)
+        .frame(height: 185)
     }
 
     // MARK: - 探针明细卡片
     private func monthDetailScrubCard(item: MonthlyCashFlowItem, scenarioItem: MonthlyCashFlowItem?) -> some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             HStack {
                 Text("\(item.monthLabel) 预测明细")
                     .font(.caption.weight(.bold))
@@ -227,17 +254,19 @@ struct DynamicCashFlowSandboxView: View {
 
                 Text("期末现金: \(item.endingCash.formattedCurrencyCompact)")
                     .font(.caption.weight(.semibold))
+                    .monospacedDigit()
                     .foregroundStyle(item.endingCash < 0 ? .red : .blue)
 
                 if let scen = scenarioItem, scenario.isModifiedFromBaseline {
                     let diff = scen.endingCash - item.endingCash
                     Text("(\(diff >= 0 ? "+" : "")\(diff.formattedCurrencyCompact))")
-                        .font(.caption2.weight(.medium))
+                        .font(.caption2.weight(.bold))
+                        .monospacedDigit()
                         .foregroundStyle(diff >= 0 ? .green : .orange)
                 }
             }
 
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 metricItem(label: "预计收入", value: item.estimatedIncome, color: .green)
                 metricItem(label: "刚性支出", value: item.totalMustPay, color: .red)
                 metricItem(label: "自由结余", value: item.monthlySurplus, color: .purple)
@@ -249,12 +278,12 @@ struct DynamicCashFlowSandboxView: View {
     }
 
     private func metricItem(label: String, value: Double, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .font(.caption2)
+                .font(.system(size: 10))
                 .foregroundStyle(.secondary)
             Text(value.formattedCurrencyCompact)
-                .font(.system(.caption, design: .monospaced, weight: .semibold))
+                .font(.system(.caption2, design: .monospaced, weight: .semibold))
                 .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -262,7 +291,7 @@ struct DynamicCashFlowSandboxView: View {
 
     // MARK: - 沉浸式胶囊手柄控制台 (Pill Handlers)
     private var floatingScenarioPills: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             // 1. 收入冲击胶囊组
             VStack(alignment: .leading, spacing: 6) {
                 Text("📉 收入冲击压力测试")
@@ -303,7 +332,7 @@ struct DynamicCashFlowSandboxView: View {
             // 3. 突发单笔支出快捷胶囊
             HStack(spacing: 8) {
                 Text("⚠️ 突发开支:")
-                    .font(.caption2)
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
 
                 lumpPill(amount: 0, title: "无")
@@ -313,13 +342,17 @@ struct DynamicCashFlowSandboxView: View {
             }
         }
         .padding(14)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color(UIColor.separator).opacity(0.12), lineWidth: 0.5)
+        )
     }
 
     private func incomePill(pct: Double, title: String) -> some View {
         let isSelected = abs(scenario.incomeAdjustmentPct - pct) < 0.001
         return Button {
-            withAnimation(.spring(duration: 0.25)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
                 scenario.incomeAdjustmentPct = pct
             }
         } label: {
@@ -327,16 +360,20 @@ struct DynamicCashFlowSandboxView: View {
                 .font(.caption.weight(isSelected ? .bold : .regular))
                 .foregroundStyle(isSelected ? .white : .primary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-                .background(isSelected ? (pct < 0 ? Color.orange : Color.accentColor) : Color(.tertiarySystemGroupedBackground), in: Capsule())
+                .frame(height: 32)
+                .background(
+                    isSelected ? (pct < 0 ? Color.orange : Color.accentColor) : Color(.tertiarySystemGroupedBackground),
+                    in: Capsule()
+                )
         }
+        .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.95, pressedOpacity: 0.85))
         .sensoryFeedback(.impact(weight: .light), trigger: scenario.incomeAdjustmentPct)
     }
 
     private func strategyPill(_ strat: RepaymentStrategy) -> some View {
         let isSelected = scenario.repaymentStrategy == strat
         return Button {
-            withAnimation(.spring(duration: 0.25)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
                 scenario.repaymentStrategy = strat
             }
         } label: {
@@ -344,26 +381,35 @@ struct DynamicCashFlowSandboxView: View {
                 .font(.caption.weight(isSelected ? .bold : .regular))
                 .foregroundStyle(isSelected ? .white : .primary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-                .background(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground), in: Capsule())
+                .frame(height: 32)
+                .background(
+                    isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground),
+                    in: Capsule()
+                )
         }
+        .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.95, pressedOpacity: 0.85))
         .sensoryFeedback(.selection, trigger: scenario.repaymentStrategy)
     }
 
     private func lumpPill(amount: Double, title: String) -> some View {
         let isSelected = abs(scenario.lumpSumExpense - amount) < 0.01
         return Button {
-            withAnimation(.spring(duration: 0.25)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
                 scenario.lumpSumExpense = amount
             }
         } label: {
             Text(title)
                 .font(.caption2.weight(isSelected ? .bold : .regular))
                 .foregroundStyle(isSelected ? .white : .primary)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(isSelected ? Color.orange : Color(.tertiarySystemGroupedBackground), in: Capsule())
+                .padding(.horizontal, 12)
+                .frame(height: 28)
+                .background(
+                    isSelected ? Color.orange : Color(.tertiarySystemGroupedBackground),
+                    in: Capsule()
+                )
         }
+        .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.95, pressedOpacity: 0.85))
         .sensoryFeedback(.impact(weight: .light), trigger: scenario.lumpSumExpense)
     }
 }
+

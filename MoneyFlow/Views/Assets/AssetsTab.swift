@@ -15,6 +15,7 @@ struct AssetsTab: View {
     private var totalBalance: Double { accounts.reduce(0) { $0 + $1.balance } }
     private var totalEarmarked: Double { goals.reduce(0) { $0 + $1.currentEarmarkedAmount } }
     private var freeCash: Double { max(0.0, totalBalance - totalEarmarked) }
+    private var freeCashRatio: Double { totalBalance > 0 ? (freeCash / totalBalance) : 1.0 }
 
     var body: some View {
         NavigationStack {
@@ -29,7 +30,7 @@ struct AssetsTab: View {
                 } else {
                     List {
                         Section {
-                            VStack(alignment: .leading, spacing: 10) {
+                            VStack(alignment: .leading, spacing: 12) {
                                 Text("现金流动资产")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
@@ -41,37 +42,72 @@ struct AssetsTab: View {
                                     color: .appAsset
                                 )
 
-                                if totalEarmarked > 0 {
-                                    Divider()
+                                if totalEarmarked > 0 && totalBalance > 0 {
+                                    // 双色流动性分配比例条 (Dual-tone Allocation Capsule Bar)
+                                    GeometryReader { geo in
+                                        let totalW = geo.size.width
+                                        let freeW = totalW * CGFloat(freeCashRatio)
+                                        let earmarkedW = totalW - freeW
+
+                                        HStack(spacing: 2) {
+                                            if freeW > 0 {
+                                                Capsule()
+                                                    .fill(Color.blue)
+                                                    .frame(width: max(4, freeW), height: 6)
+                                            }
+                                            if earmarkedW > 0 {
+                                                Capsule()
+                                                    .fill(Color.purple)
+                                                    .frame(width: max(4, earmarkedW), height: 6)
+                                            }
+                                        }
+                                    }
+                                    .frame(height: 6)
+                                    .animation(AppMotion.animation(for: .momentum, reduceMotion: reduceMotion), value: freeCashRatio)
 
                                     HStack {
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text("未锁定自由现金")
-                                                .font(.caption2)
-                                                .foregroundStyle(.secondary)
-                                            Text(freeCash.formattedCurrency())
-                                                .font(.subheadline.bold())
-                                                .foregroundStyle(.blue)
+                                        HStack(spacing: 6) {
+                                            Circle()
+                                                .fill(Color.blue)
+                                                .frame(width: 7, height: 7)
+                                            VStack(alignment: .leading, spacing: 1) {
+                                                Text("未锁定自由现金")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                                Text(freeCash.formattedCurrencyCompact)
+                                                    .font(.subheadline.weight(.semibold))
+                                                    .monospacedDigit()
+                                                    .contentTransition(.numericText())
+                                                    .foregroundStyle(.blue)
+                                            }
                                         }
 
                                         Spacer()
 
-                                        VStack(alignment: .trailing, spacing: 2) {
-                                            Text("已锁定规划目标")
-                                                .font(.caption2)
-                                                .foregroundStyle(.secondary)
-                                            Text(totalEarmarked.formattedCurrency())
-                                                .font(.subheadline.bold())
-                                                .foregroundStyle(.purple)
+                                        HStack(spacing: 6) {
+                                            VStack(alignment: .trailing, spacing: 1) {
+                                                Text("已锁定规划目标")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                                Text(totalEarmarked.formattedCurrencyCompact)
+                                                    .font(.subheadline.weight(.semibold))
+                                                    .monospacedDigit()
+                                                    .contentTransition(.numericText())
+                                                    .foregroundStyle(.purple)
+                                            }
+                                            Circle()
+                                                .fill(Color.purple)
+                                                .frame(width: 7, height: 7)
                                         }
                                     }
+                                    .padding(.top, 2)
                                 }
 
                                 Text("\(accounts.count) 个账户 · \(goals.count) 个规划目标")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
-                            .padding(.vertical, 6)
+                            .padding(.vertical, 8)
                             .accessibilityElement(children: .combine)
                         }
                         .listRowBackground(Color.appCardBackground)
@@ -152,3 +188,4 @@ struct AssetsTab: View {
         }
     }
 }
+

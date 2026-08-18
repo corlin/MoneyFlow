@@ -83,52 +83,52 @@ struct LoanDetailView: View {
         .sensoryFeedback(.success, trigger: paymentFeedback)
     }
 
-    // MARK: - 累计省息成就勋章
+    // MARK: - 累计省息成就徽章 (Apple-style Frosted Achievement Banner)
     private var savingsAchievementBanner: some View {
         HStack(spacing: 12) {
             Image(systemName: "sparkles")
-                .font(.title2)
+                .font(.title3)
                 .foregroundStyle(.yellow)
+                .frame(width: 32, height: 32)
+                .background(Color.yellow.opacity(0.15), in: Circle())
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("分段调息与提前还款效果显著")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.white)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
 
                 Text(savingsBannerSubtext)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.92))
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
         }
         .padding(12)
-        .background(
-            LinearGradient(
-                colors: [Color.orange, Color.red.opacity(0.85)],
-                startPoint: .leading,
-                endPoint: .trailing
-            ),
-            in: RoundedRectangle(cornerRadius: 14)
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.yellow.opacity(0.25), lineWidth: 0.8)
         )
     }
 
-    // MARK: - 核心概览卡片
+    // MARK: - 核心概览卡片 (Hero Metric & Key Figures)
     private var overviewCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 12) {
                 Image(systemName: loan.icon)
                     .font(.title2)
                     .foregroundStyle(.white)
-                    .frame(width: 48, height: 48)
+                    .frame(width: 46, height: 46)
                     .background(loan.latestAnnualRate <= rateThreshold ? Color.appHealthyDebt : Color.appWarningDebt)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .accessibilityHidden(true)
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(loan.name)
                         .font(.title3.bold())
-                    HStack {
+                        .foregroundStyle(.primary)
+                    HStack(spacing: 6) {
                         HealthBadge(annualRate: loan.latestAnnualRate, threshold: rateThreshold)
                         Text(loan.category.rawValue)
                             .font(.caption)
@@ -138,22 +138,40 @@ struct LoanDetailView: View {
             }
 
             Divider()
+                .opacity(0.6)
 
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 22) { overviewMetrics }
-                VStack(alignment: .leading, spacing: 14) { overviewMetrics }
+            // 三列金融指标卡片
+            HStack(spacing: 10) {
+                metricPod("剩余本金", loan.remainingPrincipal.formattedCurrencyCompact, .primary)
+                metricPod("当前月供", summary.currentMonthlyPayment.formattedCurrencyCompact, .appLiability)
+                metricPod("当前利率", loan.latestAnnualRate.formattedRatePercentage, .primary)
             }
         }
-        .padding()
-        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 16))
+        .padding(16)
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(Color(UIColor.separator).opacity(0.12), lineWidth: 0.5)
+        )
     }
 
-    @ViewBuilder
-    private var overviewMetrics: some View {
-        metric("剩余本金", loan.remainingPrincipal.formattedCurrencyCompact, .primary)
-        metric("当前月供", summary.currentMonthlyPayment.formattedCurrencyCompact, .appLiability)
-        metric("当前利率", loan.latestAnnualRate.formattedRatePercentage, .primary)
+    private func metricPod(_ title: String, _ value: String, _ color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.system(.subheadline, design: .rounded, weight: .bold))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+                .foregroundStyle(color)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 10))
     }
+
 
     // MARK: - 进度卡片
     private var progressCard: some View {

@@ -89,49 +89,63 @@ struct BatchLoanOCRImportSheet: View {
         }
     }
 
-    // MARK: - 选图控制台
+    // MARK: - 选图控制台 (Cohesive Dual Frosted Pickers)
     private var imagePickerControlCard: some View {
         VStack(spacing: 12) {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                     HStack(spacing: 6) {
                         Image(systemName: "photo.on.rectangle.angled")
+                            .font(.subheadline)
                         Text("相册选择截图")
+                            .font(.subheadline.weight(.semibold))
                     }
-                    .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .frame(height: 44)
                     .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 12))
                     .foregroundStyle(.white)
                 }
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.96, pressedOpacity: 0.85))
 
                 Button(action: pasteFromClipboard) {
                     HStack(spacing: 6) {
                         Image(systemName: "doc.on.clipboard")
+                            .font(.subheadline)
                         Text("粘贴截图")
+                            .font(.subheadline.weight(.semibold))
                     }
-                    .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .frame(height: 44)
                     .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
                     .foregroundStyle(.primary)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color(UIColor.separator).opacity(0.2), lineWidth: 0.5)
+                    )
                 }
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.96, pressedOpacity: 0.85))
             }
 
             if selectedImage == nil && parsedDrafts.isEmpty {
                 Button(action: loadSampleData) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 5) {
                         Image(systemName: "sparkles")
+                            .font(.caption)
                         Text("载入「本期应还借款4笔」示例数据一键体验")
+                            .font(.caption.weight(.medium))
                     }
-                    .font(.caption)
                     .foregroundStyle(Color.accentColor)
+                    .padding(.vertical, 4)
                 }
-                .padding(.top, 4)
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.97, pressedOpacity: 0.85))
             }
         }
         .padding(14)
-        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(Color(UIColor.separator).opacity(0.12), lineWidth: 0.5)
+        )
     }
 
     // MARK: - 平台前缀批量设置
