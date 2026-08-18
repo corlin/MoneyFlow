@@ -27,6 +27,8 @@ struct DynamicCashFlowSandboxView: View {
     @Binding var scenario: PlanningScenario
     var onCommitAsBaseline: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     @State private var chartMode: SandboxChartMode = .balanceLine
     @State private var selectedMonthLabel: String? = nil
 
@@ -97,7 +99,7 @@ struct DynamicCashFlowSandboxView: View {
                     Spacer()
 
                     Button("还原基准") {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
                             scenario.reset()
                         }
                     }
@@ -117,7 +119,7 @@ struct DynamicCashFlowSandboxView: View {
                     RoundedRectangle(cornerRadius: 10)
                         .strokeBorder(Color.orange.opacity(0.18), lineWidth: 0.5)
                 )
-                .transition(.move(edge: .top).combined(with: .opacity))
+                .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
             }
 
             // 核心推演图表区域
@@ -352,7 +354,7 @@ struct DynamicCashFlowSandboxView: View {
     private func incomePill(pct: Double, title: String) -> some View {
         let isSelected = abs(scenario.incomeAdjustmentPct - pct) < 0.001
         return Button {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            AppMotion.perform(level: .interactive, reduceMotion: reduceMotion) {
                 scenario.incomeAdjustmentPct = pct
             }
         } label: {
@@ -373,7 +375,7 @@ struct DynamicCashFlowSandboxView: View {
     private func strategyPill(_ strat: RepaymentStrategy) -> some View {
         let isSelected = scenario.repaymentStrategy == strat
         return Button {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            AppMotion.perform(level: .interactive, reduceMotion: reduceMotion) {
                 scenario.repaymentStrategy = strat
             }
         } label: {
@@ -394,7 +396,7 @@ struct DynamicCashFlowSandboxView: View {
     private func lumpPill(amount: Double, title: String) -> some View {
         let isSelected = abs(scenario.lumpSumExpense - amount) < 0.01
         return Button {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            AppMotion.perform(level: .interactive, reduceMotion: reduceMotion) {
                 scenario.lumpSumExpense = amount
             }
         } label: {

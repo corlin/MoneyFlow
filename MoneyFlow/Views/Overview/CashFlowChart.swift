@@ -25,7 +25,6 @@ struct CashFlowChart: View {
 
             if let selected = displayedItem {
                 selectedMonthCard(selected)
-                    .animation(AppMotion.animation(for: .interactive, reduceMotion: reduceMotion), value: selected.id)
             }
 
             Chart {
@@ -64,7 +63,6 @@ struct CashFlowChart: View {
                     .symbolSize(60)
                 }
             }
-            .animation(AppMotion.animation(for: .interactive, reduceMotion: reduceMotion), value: displayedItem?.id)
             .frame(height: dynamicTypeSize.isAccessibilitySize ? 260 : 210)
             .chartYAxis {
                 AxisMarks(position: .leading) { value in

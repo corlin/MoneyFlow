@@ -56,7 +56,7 @@ public extension View {
 
 // MARK: - Apple Fluid Button Styles
 
-/// 适用于主操作按钮（Prominent / Bordered）的 Apple 物理按压手感
+/// 适用于主操作按钮（Prominent / Bordered）的 Apple 物理按压手感（支持非对称瞬时响应与回弹）
 public struct AppSpringButtonStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
@@ -68,11 +68,23 @@ public struct AppSpringButtonStyle: ButtonStyle {
         self.pressedOpacity = pressedOpacity
     }
     
+    private var activeAnimation: Animation {
+        reduceMotion
+            ? .easeOut(duration: 0.08)
+            : .spring(response: 0.12, dampingFraction: 1.0)
+    }
+    
+    private var releaseAnimation: Animation {
+        reduceMotion
+            ? .easeOut(duration: 0.14)
+            : .spring(response: 0.28, dampingFraction: 0.92)
+    }
+    
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed && !reduceMotion ? scaleAmount : 1.0)
             .opacity(configuration.isPressed ? pressedOpacity : 1.0)
-            .animation(AppMotion.animation(for: .interactive, reduceMotion: reduceMotion), value: configuration.isPressed)
+            .animation(configuration.isPressed ? activeAnimation : releaseAnimation, value: configuration.isPressed)
     }
 }
 
@@ -88,11 +100,23 @@ public struct AppCardButtonStyle: ButtonStyle {
         self.pressedOpacity = pressedOpacity
     }
     
+    private var activeAnimation: Animation {
+        reduceMotion
+            ? .easeOut(duration: 0.08)
+            : .spring(response: 0.12, dampingFraction: 1.0)
+    }
+    
+    private var releaseAnimation: Animation {
+        reduceMotion
+            ? .easeOut(duration: 0.14)
+            : .spring(response: 0.28, dampingFraction: 0.95)
+    }
+    
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed && !reduceMotion ? scaleAmount : 1.0)
             .opacity(configuration.isPressed ? pressedOpacity : 1.0)
-            .animation(AppMotion.animation(for: .interactive, reduceMotion: reduceMotion), value: configuration.isPressed)
+            .animation(configuration.isPressed ? activeAnimation : releaseAnimation, value: configuration.isPressed)
     }
 }
 
@@ -103,3 +127,4 @@ public extension ButtonStyle where Self == AppSpringButtonStyle {
 public extension ButtonStyle where Self == AppCardButtonStyle {
     static var appCard: AppCardButtonStyle { AppCardButtonStyle() }
 }
+

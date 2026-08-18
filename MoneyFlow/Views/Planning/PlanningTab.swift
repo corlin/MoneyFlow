@@ -3,6 +3,7 @@ import SwiftData
 
 struct PlanningTab: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @Query private var cashAccounts: [CashAccount]
     @Query private var loans: [Loan]
@@ -71,7 +72,7 @@ struct PlanningTab: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .background(Color.black.opacity(0.8), in: Capsule())
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
                         .padding(.bottom, 20)
                 }
             }
@@ -148,13 +149,13 @@ struct PlanningTab: View {
         }
 
         try? modelContext.save()
-        withAnimation {
+        AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
             scenario.reset()
             showCommittedToast = true
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            withAnimation {
+            AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
                 showCommittedToast = false
             }
         }

@@ -346,7 +346,7 @@ struct LoanDetailView: View {
     }
 
     private func deleteEvent(_ event: LoanAdjustmentEvent) {
-        withAnimation {
+        AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
             if let idx = loan.adjustmentEvents.firstIndex(where: { $0.id == event.id }) {
                 loan.adjustmentEvents.remove(at: idx)
             }

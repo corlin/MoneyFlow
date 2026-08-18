@@ -367,6 +367,7 @@ struct BatchLoanOCRImportSheet: View {
 
 // MARK: - 单笔借款草稿编辑卡片
 private struct DraftLoanCard: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var draft: ParsedLoanDraft
     let platformPrefix: String
     @State private var isExpanded = false
@@ -448,7 +449,7 @@ private struct DraftLoanCard: View {
             HStack {
                 Spacer()
                 Button(isExpanded ? "收起" : "微调明细") {
-                    withAnimation(.spring(response: 0.3)) {
+                    AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
                         isExpanded.toggle()
                     }
                 }
