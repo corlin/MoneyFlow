@@ -119,13 +119,14 @@ final class RepaymentCalculatorTests: XCTestCase {
             dueDay: 25
         )
 
-        let projections = CashFlowProjector.projectCashFlow(
+        let result = CashFlowProjector.projectAdvancedCashFlow(
             initialCash: cash,
             loans: [loan],
             creditCards: [creditCard],
             warningRatio: 0.70,
             monthsCount: 12
         )
+        let projections = result.baselineItems
 
         XCTAssertEqual(projections.count, 12)
         // 第一个月支出包含信用卡 8000 + 贷款月供
@@ -144,14 +145,15 @@ final class RepaymentCalculatorTests: XCTestCase {
     }
 
     func testProjectionIncludesMonthlyIncomeAndStatesAssumptions() {
-        let projections = CashFlowProjector.projectCashFlow(
+        let result = CashFlowProjector.projectAdvancedCashFlow(
             initialCash: 10_000,
             loans: [],
             creditCards: [],
+            monthlyIncome: 5_000,
             warningRatio: 0.7,
-            monthsCount: 2,
-            monthlyIncome: 5_000
+            monthsCount: 2
         )
+        let projections = result.baselineItems
 
         XCTAssertEqual(projections[0].estimatedIncome, 5_000)
         XCTAssertEqual(projections[0].endingCash, 15_000)

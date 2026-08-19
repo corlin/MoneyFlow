@@ -89,31 +89,6 @@ struct CashFlowProjectionResult: Equatable {
 
 enum CashFlowProjector {
 
-    /// 兼容旧接口：快速预测未来 N 个月现金流
-    static func projectCashFlow(
-        initialCash: Double,
-        loans: [Loan],
-        creditCards: [CreditCard],
-        warningRatio: Double = 0.70,
-        monthsCount: Int = 12,
-        monthlyIncome: Double = 0,
-        assumptions: ProjectionAssumptions = .default
-    ) -> [MonthlyCashFlowItem] {
-        let result = projectAdvancedCashFlow(
-            initialCash: initialCash,
-            loans: loans,
-            creditCards: creditCards,
-            goals: [],
-            monthlyIncome: monthlyIncome,
-            monthlyLivingExpense: 0,
-            warningRatio: warningRatio,
-            monthsCount: monthsCount,
-            assumptions: assumptions,
-            scenario: .baseline
-        )
-        return result.baselineItems
-    }
-
     /// 专业 CFP 双轨推演与动态沙盘计算引擎
     static func projectAdvancedCashFlow(
         initialCash: Double,
