@@ -14,11 +14,11 @@ public enum AppMotion {
         public var spring: Animation {
             switch self {
             case .interactive:
-                return .spring(response: 0.22, dampingFraction: 1.0)
+                return .spring(response: 0.20, dampingFraction: 1.0)
             case .spatial:
-                return .spring(response: 0.36, dampingFraction: 1.0)
+                return .spring(response: 0.35, dampingFraction: 1.0)
             case .momentum:
-                return .spring(response: 0.34, dampingFraction: 0.82)
+                return .spring(response: 0.32, dampingFraction: 0.80)
             }
         }
         

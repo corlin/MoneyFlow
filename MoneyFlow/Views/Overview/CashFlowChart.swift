@@ -17,8 +17,8 @@ struct CashFlowChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
-                Text("12个月现金余量").font(.headline)
-                Text("每月完成已记录还款后的预计现金")
+                Text("未来 12 个月账户余钱走势").font(.headline)
+                Text("按当前收入与还款节奏预测每月月底账户余额")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -139,13 +139,13 @@ struct CashFlowChart: View {
             } else {
                 Grid(alignment: .leading, horizontalSpacing: 24, verticalSpacing: 10) {
                     GridRow {
-                        metric("\(item.date.yearMonthString)余额", item.endingCash.formattedCurrencyCompact,
+                        metric("\(item.date.yearMonthString) 月底余钱", item.endingCash.formattedCurrencyCompact,
                                item.endingCash < 0 ? .appWarningDebt : .primary)
-                        metric("预计收入", item.estimatedIncome.formattedCurrencyCompact, .primary)
+                        metric("预计进账", item.estimatedIncome.formattedCurrencyCompact, .primary)
                     }
                     GridRow {
                         metric("必须支出", item.totalMustPay.formattedCurrencyCompact, .primary)
-                        metric("当月净变动", (item.estimatedIncome - item.totalMustPay).formattedCurrencyCompact,
+                        metric("当月可存余钱", (item.estimatedIncome - item.totalMustPay).formattedCurrencyCompact,
                                item.estimatedIncome - item.totalMustPay < 0 ? .appWarningDebt : .primary)
                     }
                 }
@@ -158,11 +158,11 @@ struct CashFlowChart: View {
 
     @ViewBuilder
     private func selectedMetrics(_ item: MonthlyCashFlowItem) -> some View {
-        metric("\(item.date.yearMonthString)余额", item.endingCash.formattedCurrencyCompact,
+        metric("\(item.date.yearMonthString) 月底余钱", item.endingCash.formattedCurrencyCompact,
                item.endingCash < 0 ? .appWarningDebt : .primary)
-        metric("预计收入", item.estimatedIncome.formattedCurrencyCompact, .primary)
+        metric("预计进账", item.estimatedIncome.formattedCurrencyCompact, .primary)
         metric("必须支出", item.totalMustPay.formattedCurrencyCompact, .primary)
-        metric("当月净变动", (item.estimatedIncome - item.totalMustPay).formattedCurrencyCompact,
+        metric("当月可存余钱", (item.estimatedIncome - item.totalMustPay).formattedCurrencyCompact,
                item.estimatedIncome - item.totalMustPay < 0 ? .appWarningDebt : .primary)
     }
 

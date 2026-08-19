@@ -16,11 +16,11 @@ struct GoalListView: View {
             // 模块头部
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("多目标蓄水矩阵")
+                    Text("🌟 我的心愿与储蓄目标")
                         .font(.headline)
                         .foregroundStyle(.primary)
 
-                    Text("月度自由现金流将按优先级自动注入各目标")
+                    Text("每月结余资金将按优先级自动分配至各心愿")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -30,17 +30,17 @@ struct GoalListView: View {
                 Button {
                     showingAddSheet = true
                 } label: {
-                    Label("新建目标", systemImage: "plus.circle.fill")
+                    Label("添加心愿", systemImage: "plus.circle.fill")
                         .font(.subheadline.weight(.semibold))
                 }
             }
 
-            // 超额分账警告
+            // 超额预备警告
             if summary.isOverAllocated {
                 HStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
-                    Text("存量分账总额 (\(summary.totalEarmarkedAmount.formattedCurrencyCompact)) 超过实际总现金 (\(totalCash.formattedCurrencyCompact))，请调整分账金额以防资金假象。")
+                    Text("已预备存款总额 (\(summary.totalEarmarkedAmount.formattedCurrencyCompact)) 超过了当前可用总现金 (\(totalCash.formattedCurrencyCompact))，建议适当调低各目标的预备金额。")
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }

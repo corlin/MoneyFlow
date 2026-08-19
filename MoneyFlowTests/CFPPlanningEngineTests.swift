@@ -268,4 +268,79 @@ final class CFPPlanningEngineTests: XCTestCase {
         XCTAssertEqual(settings2.monthlyLivingExpense, 6500)
         XCTAssertEqual(settings2.emergencyFundMonthsTarget, 6)
     }
+
+    // MARK: - 5. 现金流推演边界与时间轴对齐测试
+
+    func testShortenTermLoanDoesNotContinuePaymentAfterPayoffInProjection() {
+        // 贷款初始总期数 24 期，但在第 2 期提前还本导致第 3 期即完全结清
+        let loan = Loan(
+            name: "短期消费分期",
+            category: .consumerLoan,
+            totalAmount: 10000,
+            remainingPrincipal: 10000,
+            annualRate: 0.0,
+            repaymentMethod: .equalPrincipal,
+            totalPeriods: 10,
+            paidPeriods: 0,
+            monthlyPayment: 1000,
+            startDate: Date()
+        )
+
+        // 第 2 期提前还本 8000，缩短期限
+        let prepayEvent = LoanAdjustmentEvent(
+            date: Date().addingMonths(1),
+            periodIndex: 2,
+            type: .prepayment,
+            prepaymentAmount: 8000,
+            prepaymentEffect: .shortenTerm,
+            loan: loan
+        )
+        loan.adjustmentEvents = [prepayEvent]
+
+        let result = CashFlowProjector.projectAdvancedCashFlow(
+            initialCash: 20000,
+            loans: [loan],
+            creditCards: [],
+            goals: [],
+            monthlyIncome: 5000,
+            monthlyLivingExpense: 2000,
+            monthsCount: 12
+        )
+
+        XCTAssertEqual(result.baselineItems.count, 12)
+        // 第 1 期还款正常 (本金 1000)
+        XCTAssertEqual(result.baselineItems[0].loanPayment, 1000, accuracy: 0.1)
+        // 第 2 期提前还本 8000 + 当期本金 500 = 8500
+        XCTAssertEqual(result.baselineItems[1].loanPayment, 8500, accuracy: 0.1)
+        // 第 3 期结清尾款 500
+        XCTAssertEqual(result.baselineItems[2].loanPayment, 500, accuracy: 0.1)
+        // 第 4 期起贷款完全结清，第 4~12 个月月供必须严格为 0
+        for i in 3..<12 {
+            XCTAssertEqual(result.baselineItems[i].loanPayment, 0.0, "第 \(i+1) 个月贷款已结清，月供必须为 0")
+            XCTAssertEqual(result.baselineItems[i].totalMustPay, 2000.0, "刚性总支出仅包含生活支出 2000")
+        }
+    }
+
+    func testProjectionDatesAreAlignedToStartOfMonth() {
+        let result = CashFlowProjector.projectAdvancedCashFlow(
+            initialCash: 10000,
+            loans: [],
+            creditCards: [],
+            goals: [],
+            monthlyIncome: 5000,
+            monthlyLivingExpense: 2000,
+            monthsCount: 12
+        )
+
+        let calendar = Calendar.current
+        for (index, item) in result.baselineItems.enumerated() {
+            let day = calendar.component(.day, from: item.date)
+            let hour = calendar.component(.hour, from: item.date)
+            let minute = calendar.component(.minute, from: item.date)
+            XCTAssertEqual(day, 1, "第 \(index+1) 个月数据点必须对齐到 1 号")
+            XCTAssertEqual(hour, 0, "时间必须归一化到 0 点")
+            XCTAssertEqual(minute, 0, "时间必须归一化到 0 分")
+        }
+    }
 }
+

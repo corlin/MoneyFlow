@@ -133,6 +133,12 @@ struct LoanDetailView: View {
                         Text(loan.category.rawValue)
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        Text("·")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                        Text(repaymentMethodDescription(loan.repaymentMethod))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -172,6 +178,14 @@ struct LoanDetailView: View {
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 10))
     }
 
+    private func repaymentMethodDescription(_ method: RepaymentMethod) -> String {
+        switch method {
+        case .equalPayment: return "等额本息 (每月固定)"
+        case .equalPrincipal: return "等额本金 (逐月递减)"
+        case .interestFirst: return "先息后本 (到期还本)"
+        case .lumpSum: return "到期一次还本付息"
+        }
+    }
 
     // MARK: - 进度卡片
     private var progressCard: some View {

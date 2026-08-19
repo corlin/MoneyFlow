@@ -127,7 +127,7 @@ enum CashFlowProjector {
         assumptions: ProjectionAssumptions = .default,
         scenario: PlanningScenario = .baseline
     ) -> CashFlowProjectionResult {
-        let now = Date()
+        let now = Date().startOfMonth
         let calendar = Calendar.current
 
         // 1. 基准轨推演 (Baseline)
@@ -288,12 +288,14 @@ enum CashFlowProjector {
                 let loan = item.loan
                 let schedule = item.schedule
                 let targetPeriodIndex = loan.paidPeriods + monthIndex + 1
-                if targetPeriodIndex <= loan.totalPeriods {
+
+                if !schedule.isEmpty {
                     if let schedItem = schedule.first(where: { $0.period == targetPeriodIndex }) {
                         loanPaymentThisMonth += schedItem.monthlyPayment
-                    } else if loan.monthlyPayment > 0 {
-                        loanPaymentThisMonth += loan.monthlyPayment
                     }
+                    // 若计划表已生成但目标期数超出计划表总期数，说明贷款已提前还清，月供记为 0
+                } else if targetPeriodIndex <= loan.totalPeriods && loan.monthlyPayment > 0 {
+                    loanPaymentThisMonth += loan.monthlyPayment
                 }
             }
 

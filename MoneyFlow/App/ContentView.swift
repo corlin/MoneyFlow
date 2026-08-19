@@ -5,7 +5,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            OverviewTab()
+            OverviewTab(selectedTab: $selectedTab)
                 .tabItem {
                     Label("概览", systemImage: "square.grid.2x2.fill")
                 }

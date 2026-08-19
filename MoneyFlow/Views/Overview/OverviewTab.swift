@@ -10,6 +10,14 @@ struct OverviewTab: View {
     @Query private var goals: [FinancialGoal]
     @Query private var userSettingsList: [UserSettings]
 
+    var selectedTab: Binding<Int>?
+    var onExplorePlanning: (() -> Void)?
+
+    init(selectedTab: Binding<Int>? = nil, onExplorePlanning: (() -> Void)? = nil) {
+        self.selectedTab = selectedTab
+        self.onExplorePlanning = onExplorePlanning
+    }
+
     @State private var settingsToEdit: UserSettings?
     @State private var showingAddChooser = false
     @State private var showingAddAssetSheet = false
@@ -133,7 +141,13 @@ struct OverviewTab: View {
         LazyVStack(spacing: 16) {
             // 模块 1: CFP 财务韧性与健康中枢 (整合生命线指标、黄金建议与净现金头寸)
             FinancialResilienceHubView(analysis: debtAnalysis) {
-                // 引导用户去规划 tab
+                if let onExplorePlanning {
+                    onExplorePlanning()
+                } else if let selectedTab {
+                    AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
+                        selectedTab.wrappedValue = 1
+                    }
+                }
             }
 
             // 模块 2: 12 个月确定性现金流走势图

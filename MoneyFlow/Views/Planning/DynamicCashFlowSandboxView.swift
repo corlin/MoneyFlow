@@ -51,13 +51,13 @@ struct DynamicCashFlowSandboxView: View {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
-                        Text("动态推演沙盘")
+                        Text("未来收支与余钱预测")
                             .font(.headline)
                             .foregroundStyle(.primary)
                             .tracking(-0.2)
 
                         if scenario.isModifiedFromBaseline {
-                            Text("情景模拟中")
+                            Text("情景预测中")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.orange)
                                 .padding(.horizontal, 6)
@@ -69,7 +69,7 @@ struct DynamicCashFlowSandboxView: View {
                                 )
                         }
                     }
-                    Text("点选下方胶囊即刻观察曲线与目标形变")
+                    Text("点选下方生活情景，即时预演余钱与心愿变化")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -257,6 +257,7 @@ struct DynamicCashFlowSandboxView: View {
                 Text("期末现金: \(item.endingCash.formattedCurrencyCompact)")
                     .font(.caption.weight(.semibold))
                     .monospacedDigit()
+                    .contentTransition(.numericText())
                     .foregroundStyle(item.endingCash < 0 ? .red : .blue)
 
                 if let scen = scenarioItem, scenario.isModifiedFromBaseline {
@@ -264,15 +265,16 @@ struct DynamicCashFlowSandboxView: View {
                     Text("(\(diff >= 0 ? "+" : "")\(diff.formattedCurrencyCompact))")
                         .font(.caption2.weight(.bold))
                         .monospacedDigit()
+                        .contentTransition(.numericText())
                         .foregroundStyle(diff >= 0 ? .green : .orange)
                 }
             }
 
             HStack(spacing: 8) {
-                metricItem(label: "预计收入", value: item.estimatedIncome, color: .green)
-                metricItem(label: "刚性支出", value: item.totalMustPay, color: .red)
-                metricItem(label: "自由结余", value: item.monthlySurplus, color: .purple)
-                metricItem(label: "筑底安全", value: item.endingCash - item.totalMustPay, color: item.endingCash >= item.totalMustPay ? .primary : .orange)
+                metricItem(label: "预计进账", value: item.estimatedIncome, color: .green)
+                metricItem(label: "必须支出", value: item.totalMustPay, color: .red)
+                metricItem(label: "可存余钱", value: item.monthlySurplus, color: .purple)
+                metricItem(label: "兜底安全", value: item.endingCash - item.totalMustPay, color: item.endingCash >= item.totalMustPay ? .primary : .orange)
             }
         }
         .padding(10)
@@ -286,6 +288,8 @@ struct DynamicCashFlowSandboxView: View {
                 .foregroundStyle(.secondary)
             Text(value.formattedCurrencyCompact)
                 .font(.system(.caption2, design: .monospaced, weight: .semibold))
+                .monospacedDigit()
+                .contentTransition(.numericText())
                 .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -294,24 +298,24 @@ struct DynamicCashFlowSandboxView: View {
     // MARK: - 沉浸式胶囊手柄控制台 (Pill Handlers)
     private var floatingScenarioPills: some View {
         VStack(alignment: .leading, spacing: 14) {
-            // 1. 收入冲击胶囊组
+            // 1. 收入变动情景胶囊组
             VStack(alignment: .leading, spacing: 6) {
-                Text("📉 收入冲击压力测试")
+                Text("📉 如果收入暂时变动:")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 8) {
-                    incomePill(pct: 0.0, title: "基准 (0%)")
+                    incomePill(pct: 0.0, title: "正常收入")
                     incomePill(pct: -0.10, title: "-10%")
                     incomePill(pct: -0.20, title: "-20% 承压")
-                    incomePill(pct: -0.30, title: "-30% 极值")
+                    incomePill(pct: -0.30, title: "-30% 严峻")
                 }
             }
 
-            // 2. 还贷策略分流胶囊组
+            // 2. 还贷省息方案胶囊组
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text("⚡ 负债清偿策略")
+                    Text("⚡ 还贷省息方案:")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
 
@@ -333,7 +337,7 @@ struct DynamicCashFlowSandboxView: View {
 
             // 3. 突发单笔支出快捷胶囊
             HStack(spacing: 8) {
-                Text("⚠️ 突发开支:")
+                Text("⚠️ 如果有突发大开销:")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
 

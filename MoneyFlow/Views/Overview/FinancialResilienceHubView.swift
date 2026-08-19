@@ -30,11 +30,11 @@ struct FinancialResilienceHubView: View {
             // 头部标题与状态徽章
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("财务韧性与健康中枢")
+                    Text("财务健康与安全看板")
                         .font(.headline)
                         .foregroundStyle(.primary)
                         .tracking(-0.2)
-                    Text("CFP 偿债承载力与流动性综合体检")
+                    Text("手头流动性与每月还款压力评估")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -58,70 +58,80 @@ struct FinancialResilienceHubView: View {
                 )
             }
 
-            // 核心生命线三率 (Three Core Resilience Numbers) - 呼吸感指标格
+            // 核心生命线三率 (Three Core Resilience Numbers) - 直觉生活化指标格
             HStack(spacing: 8) {
                 metricCell(
-                    title: "应急储备",
-                    value: "\(String(format: "%.1f", analysis.emergencyCoverageMonths))月",
-                    subtext: "目标 \(analysis.emergencyTargetMonths) 个月",
+                    title: "安全缓冲",
+                    value: "\(String(format: "%.1f", analysis.emergencyCoverageMonths))个月",
+                    subtext: analysis.emergencyCoverageMonths >= Double(analysis.emergencyTargetMonths) ? "充裕 · 达标" : "建议备 \(analysis.emergencyTargetMonths) 个月",
                     color: emergencyColor
                 )
 
                 metricCell(
-                    title: "偿债比 (DSR)",
+                    title: "还贷压力",
                     value: "\(Int(analysis.dsrRatio * 100))%",
-                    subtext: analysis.dsrStatus.shortTitle,
+                    subtext: analysis.dsrStatus == .healthy ? "占月入\(Int(analysis.dsrRatio*100))% · 轻松" : (analysis.dsrStatus == .warning ? "适中 · 需关注" : "偏高 · 需防范"),
                     color: dsrColor
                 )
 
                 metricCell(
-                    title: "自由月结余",
+                    title: "每月余钱",
                     value: analysis.savingsRate > 0 ? "\(Int(analysis.savingsRate * 100))%" : "0%",
-                    subtext: "用于目标蓄水",
+                    subtext: "可用于心愿攒钱",
                     color: analysis.savingsRate > 0.15 ? .appAsset : .secondary
                 )
             }
 
             // 单条高价值黄金行动建议 (Single Golden Actionable Insight)
             if let insight = goldenInsight {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: insight.type.icon)
-                        .font(.subheadline)
-                        .foregroundStyle(insightColor(insight.type))
-                        .frame(width: 20)
-                        .padding(.top, 2)
+                Button(action: onExplorePlanning) {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: insight.type.icon)
+                            .font(.subheadline)
+                            .foregroundStyle(insightColor(insight.type))
+                            .frame(width: 20)
+                            .padding(.top, 2)
 
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(insight.title)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.primary)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("💡 \(insight.title)")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
 
-                        Text(insight.detail)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                            Text(insight.detail)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                            .padding(.top, 4)
                     }
-
-                    Spacer()
+                    .padding(12)
+                    .background(
+                        insightColor(insight.type).opacity(0.06),
+                        in: RoundedRectangle(cornerRadius: 12)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(insightColor(insight.type).opacity(0.15), lineWidth: 0.5)
+                    )
+                    .contentShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .padding(12)
-                .background(
-                    insightColor(insight.type).opacity(0.06),
-                    in: RoundedRectangle(cornerRadius: 12)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(insightColor(insight.type).opacity(0.15), lineWidth: 0.5)
-                )
+                .buttonStyle(AppCardButtonStyle())
+                .accessibilityHint("前往推演沙盘与心愿目标")
             }
 
             Divider()
                 .opacity(0.6)
 
-            // 底部净现金头寸与规划跳转
+            // 底部可用总资金与规划跳转
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("当前净现金头寸")
+                    Text("当前可用总资金")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     Text(analysis.netCashPosition.formattedCurrencyCompact)
@@ -135,7 +145,7 @@ struct FinancialResilienceHubView: View {
 
                 Button(action: onExplorePlanning) {
                     HStack(spacing: 5) {
-                        Text("推演沙盘与目标")
+                        Text("查看未来收支与心愿")
                             .font(.caption.weight(.semibold))
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.caption)
