@@ -340,3 +340,27 @@ enum RiskAnalyzer {
         return reminders.sorted { $0.daysRemaining < $1.daysRemaining }
     }
 }
+
+struct UpcomingPaymentSummary: Equatable {
+    let horizonDays: Int
+    let totalAmount: Double
+    let totalCount: Int
+    let visibleReminders: [UpcomingPaymentReminder]
+
+    static func make(
+        reminders: [UpcomingPaymentReminder],
+        horizonDays: Int = 30,
+        visibleLimit: Int = 3
+    ) -> UpcomingPaymentSummary {
+        let included = reminders
+            .filter { $0.daysRemaining >= 0 && $0.daysRemaining <= horizonDays }
+            .sorted { $0.daysRemaining < $1.daysRemaining }
+
+        return UpcomingPaymentSummary(
+            horizonDays: horizonDays,
+            totalAmount: included.reduce(0) { $0 + $1.amount },
+            totalCount: included.count,
+            visibleReminders: Array(included.prefix(max(0, visibleLimit)))
+        )
+    }
+}

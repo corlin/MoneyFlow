@@ -29,7 +29,6 @@
 		56295DCB8DFD780453AB8A8E /* CashFlowChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 904D5DFB3F23A7069B62A22F /* CashFlowChart.swift */; };
 		572C7B72750F71C86BAEF19F /* RiskAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92068B5742CA987B0D04B7A8 /* RiskAnalyzer.swift */; };
 		58F628E461864B094B9AC427 /* GoalCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EAA7218202D645F8DA8FD1F /* GoalCardView.swift */; };
-		6CCE37C81C0A4A0041A1C105 /* FinancialPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F88453924D4CE7C1A773123 /* FinancialPresentation.swift */; };
 		6E22AF2955D0D4AD53024E67 /* CashAccountRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45349140668E5D10DEF66B94 /* CashAccountRow.swift */; };
 		6E3EB112D5ABB265D13089B6 /* LoanOCRScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155180D9E16BECCA6A34254E /* LoanOCRScannerService.swift */; };
 		7266CFD46D6ECC2AE4FF614B /* BiometricLockService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 164D640D05E96875DF869363 /* BiometricLockService.swift */; };
@@ -91,7 +90,6 @@
 		0817CA82FA37A84E5ACEE6DE /* CashFlowProjector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowProjector.swift; sourceTree = "<group>"; };
 		097A40112A60B9E9F2802885 /* PrivacyBlurOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyBlurOverlayView.swift; sourceTree = "<group>"; };
 		0EAA7218202D645F8DA8FD1F /* GoalCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCardView.swift; sourceTree = "<group>"; };
-		0F88453924D4CE7C1A773123 /* FinancialPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialPresentation.swift; sourceTree = "<group>"; };
 		155180D9E16BECCA6A34254E /* LoanOCRScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanOCRScannerService.swift; sourceTree = "<group>"; };
 		164D640D05E96875DF869363 /* BiometricLockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricLockService.swift; sourceTree = "<group>"; };
 		2447FA27296BBC81934BCD36 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
@@ -332,7 +330,6 @@
 				EBEB2B76BDD67F49E7BF5675 /* DemoDataService.swift */,
 				44AA8E1662F2105941AE3EEA /* FinancialDataExport.swift */,
 				D39CAA70886D499BAEB1BE18 /* FinancialInputParser.swift */,
-				0F88453924D4CE7C1A773123 /* FinancialPresentation.swift */,
 				155180D9E16BECCA6A34254E /* LoanOCRScannerService.swift */,
 				A12246B3066447E769BBE68B /* MultiGoalEngine.swift */,
 				73D503A5725C5010F0378384 /* NotificationService.swift */,
@@ -511,7 +508,6 @@
 				F1F4432E3965E592300C6103 /* FinancialDataExport.swift in Sources */,
 				C46089F4DEFC8B47E3F2DFAD /* FinancialGoal.swift in Sources */,
 				D99EC6629D64E638CB5BD768 /* FinancialInputParser.swift in Sources */,
-				6CCE37C81C0A4A0041A1C105 /* FinancialPresentation.swift in Sources */,
 				D81F492970A36B03CE6BBB96 /* FinancialResilienceHubView.swift in Sources */,
 				58F628E461864B094B9AC427 /* GoalCardView.swift in Sources */,
 				50D0BDEE649720D4C24E978D /* GoalFormSheet.swift in Sources */,

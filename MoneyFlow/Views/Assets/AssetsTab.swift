@@ -119,7 +119,7 @@ struct AssetsTab: View {
                                 } label: {
                                     CashAccountRow(account: account)
                                 }
-                                .buttonStyle(AppCardButtonStyle())
+                                .buttonStyle(.appCard)
                                 .accessibilityHint("打开并编辑账户")
                             }
                             .onDelete(perform: deleteAccounts)

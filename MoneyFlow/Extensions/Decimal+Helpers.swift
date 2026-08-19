@@ -1,10 +1,5 @@
 import Foundation
 
-enum CurrencyFormatStyle {
-    case standard
-    case compact
-}
-
 extension Double {
     var formattedCurrency: String {
         let formatter = NumberFormatter()
@@ -16,21 +11,11 @@ extension Double {
     }
 
     var formattedCurrencyCompact: String {
-        let doubleValue = self
-        if abs(doubleValue) >= 10000 {
-            let wan = doubleValue / 10000.0
+        if abs(self) >= 10000 {
+            let wan = self / 10000.0
             return String(format: "¥%.2f万", wan)
         } else {
             return formattedCurrency
-        }
-    }
-
-    func formattedCurrency(style: CurrencyFormatStyle = .standard) -> String {
-        switch style {
-        case .standard:
-            return formattedCurrency
-        case .compact:
-            return formattedCurrencyCompact
         }
     }
 
@@ -51,9 +36,5 @@ extension Double {
         formatter.maximumFractionDigits = 4
         let formattedNumber = formatter.string(from: NSNumber(value: percentValue)) ?? String(format: "%.4f", percentValue)
         return "\(formattedNumber)%"
-    }
-
-    var doubleValue: Double {
-        self
     }
 }

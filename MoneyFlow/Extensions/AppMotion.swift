@@ -45,73 +45,34 @@ public enum AppMotion {
     }
 }
 
-// MARK: - View Modifiers & Extensions
-
-public extension View {
-    /// 绑定特定数值变化的流体动画（自动适配 reduceMotion）
-    func appMotion<V: Equatable>(_ level: AppMotion.Level = .spatial, value: V, reduceMotion: Bool = false) -> some View {
-        self.animation(AppMotion.animation(for: level, reduceMotion: reduceMotion), value: value)
-    }
-}
-
 // MARK: - Apple Fluid Button Styles
 
-/// 适用于主操作按钮（Prominent / Bordered）的 Apple 物理按压手感（支持非对称瞬时响应与回弹）
+/// 适用于各类按钮与卡片的 Apple 物理按压手感（支持非对称瞬时响应与回弹）
 public struct AppSpringButtonStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
-    public var scaleAmount: CGFloat
-    public var pressedOpacity: CGFloat
-    
-    public init(scaleAmount: CGFloat = 0.97, pressedOpacity: CGFloat = 0.88) {
-        self.scaleAmount = scaleAmount
-        self.pressedOpacity = pressedOpacity
-    }
-    
-    private var activeAnimation: Animation {
-        reduceMotion
-            ? .easeOut(duration: 0.08)
-            : .spring(response: 0.12, dampingFraction: 1.0)
-    }
-    
-    private var releaseAnimation: Animation {
-        reduceMotion
-            ? .easeOut(duration: 0.14)
-            : .spring(response: 0.28, dampingFraction: 0.92)
-    }
-    
-    public func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed && !reduceMotion ? scaleAmount : 1.0)
-            .opacity(configuration.isPressed ? pressedOpacity : 1.0)
-            .animation(configuration.isPressed ? activeAnimation : releaseAnimation, value: configuration.isPressed)
-    }
-}
 
-/// 适用于卡片、列表行及轻量跳转项的物理微动量按压手感
-public struct AppCardButtonStyle: ButtonStyle {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
     public var scaleAmount: CGFloat
     public var pressedOpacity: CGFloat
-    
-    public init(scaleAmount: CGFloat = 0.985, pressedOpacity: CGFloat = 0.92) {
+    public var releaseDamping: Double
+
+    public init(scaleAmount: CGFloat = 0.97, pressedOpacity: CGFloat = 0.88, releaseDamping: Double = 0.92) {
         self.scaleAmount = scaleAmount
         self.pressedOpacity = pressedOpacity
+        self.releaseDamping = releaseDamping
     }
-    
+
     private var activeAnimation: Animation {
         reduceMotion
             ? .easeOut(duration: 0.08)
             : .spring(response: 0.12, dampingFraction: 1.0)
     }
-    
+
     private var releaseAnimation: Animation {
         reduceMotion
             ? .easeOut(duration: 0.14)
-            : .spring(response: 0.28, dampingFraction: 0.95)
+            : .spring(response: 0.28, dampingFraction: releaseDamping)
     }
-    
+
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed && !reduceMotion ? scaleAmount : 1.0)
@@ -121,10 +82,16 @@ public struct AppCardButtonStyle: ButtonStyle {
 }
 
 public extension ButtonStyle where Self == AppSpringButtonStyle {
-    static var appSpring: AppSpringButtonStyle { AppSpringButtonStyle() }
+    /// 适用于主操作按钮（Prominent / Bordered）的标准物理按压手感
+    static var appSpring: AppSpringButtonStyle {
+        AppSpringButtonStyle(scaleAmount: 0.97, pressedOpacity: 0.88, releaseDamping: 0.92)
+    }
+
+    /// 适用于卡片、列表行及轻量跳转项的物理微动量按压手感
+    static var appCard: AppSpringButtonStyle {
+        AppSpringButtonStyle(scaleAmount: 0.985, pressedOpacity: 0.92, releaseDamping: 0.95)
+    }
 }
 
-public extension ButtonStyle where Self == AppCardButtonStyle {
-    static var appCard: AppCardButtonStyle { AppCardButtonStyle() }
-}
+public typealias AppCardButtonStyle = AppSpringButtonStyle
 

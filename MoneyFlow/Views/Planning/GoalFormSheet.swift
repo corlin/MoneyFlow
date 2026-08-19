@@ -128,7 +128,7 @@ struct GoalFormSheet: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Spacer()
-                            Text("可用: \(availableCashToEarmark.formattedCurrency(style: .compact))")
+                            Text("可用: \(availableCashToEarmark.formattedCurrencyCompact)")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }

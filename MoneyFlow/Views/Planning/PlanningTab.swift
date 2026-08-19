@@ -86,28 +86,28 @@ struct PlanningTab: View {
         return HStack(spacing: 10) {
             summaryMetricItem(
                 title: "自由流动现金",
-                value: freeCash.formattedCurrency(style: .compact),
+                value: freeCash.formattedCurrencyCompact,
                 subtext: "未锁定",
                 color: .blue
             )
 
             summaryMetricItem(
                 title: "已分账目标池",
-                value: totalEarmarked.formattedCurrency(style: .compact),
+                value: totalEarmarked.formattedCurrencyCompact,
                 subtext: "共 \(goals.count) 个目标",
                 color: .purple
             )
 
             summaryMetricItem(
                 title: "月度自由结余",
-                value: firstMonthSurplus.formattedCurrency(style: .compact),
+                value: firstMonthSurplus.formattedCurrencyCompact,
                 subtext: "用于动态灌溉",
                 color: firstMonthSurplus > 0 ? .green : .red
             )
 
             summaryMetricItem(
                 title: "预测最低现金",
-                value: result.troughBalance.formattedCurrency(style: .compact),
+                value: result.troughBalance.formattedCurrencyCompact,
                 subtext: result.troughMonthLabel,
                 color: result.troughBalance >= 0 ? .primary : .red
             )

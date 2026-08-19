@@ -71,7 +71,7 @@ struct GoalCardView: View {
                         Text("当前已攒金额")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
-                        Text(item.projectedTotal.formattedCurrency())
+                        Text(item.projectedTotal.formattedCurrency)
                             .font(.system(.title3, design: .rounded, weight: .bold))
                             .monospacedDigit()
                             .contentTransition(.numericText())
@@ -84,7 +84,7 @@ struct GoalCardView: View {
                         Text("心愿总额")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
-                        Text(item.targetAmount.formattedCurrency())
+                        Text(item.targetAmount.formattedCurrency)
                             .font(.system(.subheadline, design: .monospaced, weight: .medium))
                             .monospacedDigit()
                             .foregroundStyle(.secondary)
@@ -104,7 +104,7 @@ struct GoalCardView: View {
                         Circle()
                             .fill(goal.category.themeColor)
                             .frame(width: 6, height: 6)
-                        Text("已备存款: \(item.initialEarmarked.formattedCurrency(style: .compact))")
+                        Text("已备存款: \(item.initialEarmarked.formattedCurrencyCompact)")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
@@ -114,7 +114,7 @@ struct GoalCardView: View {
                             Circle()
                                 .fill(goal.category.themeColor.opacity(0.45))
                                 .frame(width: 6, height: 6)
-                            Text("每月自动攒入: +\(item.projectedIrrigation.formattedCurrency(style: .compact))")
+                            Text("每月自动攒入: +\(item.projectedIrrigation.formattedCurrencyCompact)")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
@@ -153,7 +153,7 @@ struct GoalCardView: View {
             )
             .contentShape(RoundedRectangle(cornerRadius: 16))
         }
-        .buttonStyle(AppCardButtonStyle())
+        .buttonStyle(.appCard)
         .accessibilityHint("打开并编辑心愿目标")
     }
 
@@ -198,7 +198,7 @@ struct GoalCardView: View {
             HStack(spacing: 4) {
                 Image(systemName: "hourglass")
                     .font(.system(size: 10))
-                Text("⏳ 尚差 \(item.remainingGap.formattedCurrency(style: .compact))")
+                Text("⏳ 尚差 \(item.remainingGap.formattedCurrencyCompact)")
                     .font(.system(size: 11, weight: .medium))
             }
             .foregroundStyle(.secondary)

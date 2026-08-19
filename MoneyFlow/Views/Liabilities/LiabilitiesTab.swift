@@ -105,7 +105,7 @@ struct LiabilitiesTab: View {
                                     } label: {
                                         CreditCardRow(card: card)
                                     }
-                                    .buttonStyle(AppCardButtonStyle())
+                                    .buttonStyle(.appCard)
                                     .accessibilityHint("打开并编辑信用卡")
                                 }
                                 .onDelete(perform: deleteCards)

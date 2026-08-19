@@ -177,3 +177,13 @@ struct CashFlowChart: View {
         }
     }
 }
+
+enum CashFlowChartSummary {
+    static func text(for items: [MonthlyCashFlowItem]) -> String {
+        guard let minimum = items.map(\.endingCash).min() else {
+            return "暂无偿债后现金余额数据"
+        }
+        let warnings = items.filter(\.isWarning).count
+        return "未来\(items.count)个月偿债后现金余额，最低预计余额\(minimum.formattedCurrencyCompact)，\(warnings)个月需关注。"
+    }
+}

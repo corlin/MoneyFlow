@@ -121,7 +121,7 @@ struct FinancialResilienceHubView: View {
                     )
                     .contentShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .buttonStyle(AppCardButtonStyle())
+                .buttonStyle(.appCard)
                 .accessibilityHint("前往推演沙盘与心愿目标")
             }
 

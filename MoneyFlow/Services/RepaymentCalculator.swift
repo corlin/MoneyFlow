@@ -130,7 +130,7 @@ enum RepaymentCalculator {
                         currentPrincipal = max(0, currentPrincipal - actualPrepay)
                         periodPrepayment += actualPrepay
                         totalPaymentAccum += actualPrepay
-                        eventBadges.append("⚡ 提前还本 \(actualPrepay.formattedCurrency(style: .compact))")
+                        eventBadges.append("⚡ 提前还本 \(actualPrepay.formattedCurrencyCompact)")
 
                         if event.prepaymentEffect == .shortenTerm && currentPrincipal > 0 {
                             // 期限缩短，月供保持不变: 计算新剩余期数

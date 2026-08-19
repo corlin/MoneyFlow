@@ -66,7 +66,7 @@ struct UpcomingPaymentsCard: View {
                             .padding(.vertical, 8)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(AppCardButtonStyle())
+                        .buttonStyle(.appCard)
                         .accessibilityHint("打开对应负债")
 
                         if reminder.id != summary.visibleReminders.last?.id {

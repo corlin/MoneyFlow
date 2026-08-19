@@ -150,7 +150,7 @@ struct LoanAdjustmentEventSheet: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text("剩余本金: \(loan.remainingPrincipal.formattedCurrency(style: .compact))")
+                    Text("剩余本金: \(loan.remainingPrincipal.formattedCurrencyCompact)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
