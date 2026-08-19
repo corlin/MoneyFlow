@@ -23,6 +23,8 @@ targets:
     platform: iOS
     sources:
       - path: MoneyFlow
+    dependencies:
+      - target: MoneyFlowWidgets
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.moneyflow.app
@@ -35,6 +37,19 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         INFOPLIST_KEY_NSFaceIDUsageDescription: "MoneyFlow 需要使用面容 ID 保护您的资产与财务数据隐私。"
+
+  MoneyFlowWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: MoneyFlowWidgets
+      - path: MoneyFlow/Models/WidgetSnapshotData.swift
+    settings:
+      GENERATE_INFOPLIST_FILE: NO
+      INFOPLIST_FILE: MoneyFlowWidgets/Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.moneyflow.app.widgets
+      CURRENT_PROJECT_VERSION: 1
+      MARKETING_VERSION: 1.0.0
 
   MoneyFlowTests:
     type: bundle.unit-test

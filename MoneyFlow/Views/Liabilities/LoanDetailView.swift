@@ -16,6 +16,7 @@ struct LoanDetailView: View {
     @State private var undoAction: UndoAction?
     @State private var errorMessage: String?
     @State private var paymentFeedback = false
+    @State private var showingOpportunityCostCalculator = false
 
     private var summary: RepaymentSummary { calculateSummary() }
 
@@ -69,6 +70,9 @@ struct LoanDetailView: View {
                 eventToEdit: eventToEdit,
                 defaultType: eventSheetDefaultType
             )
+        }
+        .sheet(isPresented: $showingOpportunityCostCalculator) {
+            OpportunityCostCalculatorView(initialLoan: loan)
         }
         .safeAreaInset(edge: .bottom) {
             if let undoAction {
@@ -262,6 +266,31 @@ struct LoanDetailView: View {
                     .tint(.blue)
                 }
             }
+
+            // 机会成本精算快捷入口
+            Button {
+                showingOpportunityCostCalculator = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "scalemass.fill")
+                        .foregroundStyle(.blue)
+                        .font(.caption)
+                    Text("手里有闲钱？算算提前还本笔贷款是否划算")
+                        .font(.caption)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Text("机会成本精算")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.blue)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.blue.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
 
             Divider()
 

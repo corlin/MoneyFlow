@@ -8,6 +8,7 @@ struct ContentView: View {
     @Query private var settingsList: [UserSettings]
     @Query private var loans: [Loan]
     @Query private var creditCards: [CreditCard]
+    @Query private var cashAccounts: [CashAccount]
 
     @State private var selectedTab = 0
     @ObservedObject private var lockService = BiometricLockService.shared
@@ -80,15 +81,36 @@ struct ContentView: View {
                         isEnabled: currentSettings.isPaymentReminderEnabled,
                         daysBefore: currentSettings.reminderDaysBefore
                     )
+                    WidgetSnapshotService.shared.syncSnapshot(
+                        accounts: cashAccounts,
+                        loans: loans,
+                        creditCards: creditCards,
+                        settings: currentSettings
+                    )
                 },
                 onCompleteManual: {
                     currentSettings.hasCompletedOnboarding = true
                     try? modelContext.save()
+                    WidgetSnapshotService.shared.syncSnapshot(
+                        accounts: cashAccounts,
+                        loans: loans,
+                        creditCards: creditCards,
+                        settings: currentSettings
+                    )
                 }
             )
         }
         .onAppear {
             lockService.handleColdBoot(isEnabled: currentSettings.isBiometricLockEnabled)
+            WidgetSnapshotService.shared.syncSnapshot(
+                accounts: cashAccounts,
+                loans: loans,
+                creditCards: creditCards,
+                settings: currentSettings
+            )
+        }
+        .onOpenURL { url in
+            handleDeepLink(url: url)
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -96,6 +118,12 @@ struct ContentView: View {
                 lockService.handleAppDidEnterBackground(
                     isEnabled: currentSettings.isBiometricLockEnabled,
                     timeoutSeconds: currentSettings.autoLockIntervalSeconds
+                )
+                WidgetSnapshotService.shared.syncSnapshot(
+                    accounts: cashAccounts,
+                    loans: loans,
+                    creditCards: creditCards,
+                    settings: currentSettings
                 )
             case .active:
                 lockService.handleAppWillEnterForeground(
@@ -110,11 +138,33 @@ struct ContentView: View {
                         daysBefore: currentSettings.reminderDaysBefore
                     )
                 }
+                WidgetSnapshotService.shared.syncSnapshot(
+                    accounts: cashAccounts,
+                    loans: loans,
+                    creditCards: creditCards,
+                    settings: currentSettings
+                )
             case .inactive:
                 break
             @unknown default:
                 break
             }
+        }
+    }
+
+    private func handleDeepLink(url: URL) {
+        guard let host = url.host else { return }
+        switch host {
+        case "overview":
+            selectedTab = 0
+        case "planning":
+            selectedTab = 1
+        case "assets":
+            selectedTab = 2
+        case "liabilities":
+            selectedTab = 3
+        default:
+            break
         }
     }
 }
