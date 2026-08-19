@@ -451,6 +451,7 @@ struct LoanDetailView: View {
         do {
             try modelContext.save()
             paymentFeedback.toggle()
+            NotificationService.shared.cancelReminder(for: loan.id)
             let action = UndoAction(message: "已记录第 \(loan.paidPeriods) 期还款") {
                 AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
                     loan.paidPeriods = previousPaid

@@ -22,6 +22,18 @@ public final class UserSettings {
     // 目标应急缓冲月数（CFP 标准建议 3~6 个月，默认 3）
     public var emergencyFundMonthsTarget: Int = 3
 
+    // 生物识别隐私锁（Face ID / Touch ID）
+    public var isBiometricLockEnabled: Bool = false
+
+    // 自动锁定超时时间（秒，0 代表离开即锁，60 代表离开 1 分钟后锁定）
+    public var autoLockIntervalSeconds: Int = 0
+
+    // 是否已完成首次启动向导
+    public var hasCompletedOnboarding: Bool = false
+
+    // 是否开启本地还款提醒通知
+    public var isPaymentReminderEnabled: Bool = true
+
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
 
@@ -33,6 +45,10 @@ public final class UserSettings {
         monthlyEstimatedIncome: Double = 0,
         monthlyLivingExpense: Double = 0,
         emergencyFundMonthsTarget: Int = 3,
+        isBiometricLockEnabled: Bool = false,
+        autoLockIntervalSeconds: Int = 0,
+        hasCompletedOnboarding: Bool = false,
+        isPaymentReminderEnabled: Bool = true,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -43,6 +59,10 @@ public final class UserSettings {
         self.monthlyEstimatedIncome = monthlyEstimatedIncome
         self.monthlyLivingExpense = monthlyLivingExpense
         self.emergencyFundMonthsTarget = emergencyFundMonthsTarget
+        self.isBiometricLockEnabled = isBiometricLockEnabled
+        self.autoLockIntervalSeconds = autoLockIntervalSeconds
+        self.hasCompletedOnboarding = hasCompletedOnboarding
+        self.isPaymentReminderEnabled = isPaymentReminderEnabled
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

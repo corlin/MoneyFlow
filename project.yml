@@ -34,6 +34,7 @@ targets:
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        INFOPLIST_KEY_NSFaceIDUsageDescription: "MoneyFlow 需要使用面容 ID 保护您的资产与财务数据隐私。"
 
   MoneyFlowTests:
     type: bundle.unit-test

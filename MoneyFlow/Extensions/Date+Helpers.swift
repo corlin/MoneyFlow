@@ -19,6 +19,12 @@ extension Date {
         return formatter.string(from: self)
     }
 
+    var monthDayString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M月d日"
+        return formatter.string(from: self)
+    }
+
     func addingMonths(_ months: Int) -> Date {
         Calendar.current.date(byAdding: .month, value: months, to: self) ?? self
     }

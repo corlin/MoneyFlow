@@ -94,6 +94,59 @@ struct SettingsView: View {
                     Stepper("提前 \(settings.reminderDaysBefore) 天提醒", value: $settings.reminderDaysBefore, in: 1...15)
                 }
 
+                Section("安全与隐私保护") {
+                    Toggle(isOn: $settings.isBiometricLockEnabled) {
+                        Label("开启\(BiometricLockService.shared.availableBiometryType.title)保护", systemImage: BiometricLockService.shared.availableBiometryType.systemImage)
+                    }
+
+                    if settings.isBiometricLockEnabled {
+                        Picker("自动锁定时间", selection: $settings.autoLockIntervalSeconds) {
+                            Text("立即锁定").tag(0)
+                            Text("离开 1 分钟后").tag(60)
+                            Text("离开 5 分钟后").tag(300)
+                        }
+
+                        Button("立即锁定 App", systemImage: "lock.fill") {
+                            BiometricLockService.shared.lockNow()
+                            dismiss()
+                        }
+                    }
+                }
+
+                Section("还款提醒与通知") {
+                    Toggle("开启本地还款提醒", isOn: $settings.isPaymentReminderEnabled)
+                        .onChange(of: settings.isPaymentReminderEnabled) { _, newValue in
+                            if newValue {
+                                Task {
+                                    await NotificationService.shared.requestAuthorization()
+                                    NotificationService.shared.scheduleAllReminders(
+                                        loans: loans,
+                                        creditCards: creditCards,
+                                        isEnabled: true,
+                                        daysBefore: settings.reminderDaysBefore
+                                    )
+                                }
+                            } else {
+                                NotificationService.shared.cancelAllReminders()
+                            }
+                        }
+
+                    if settings.isPaymentReminderEnabled {
+                        Stepper("提前 \(settings.reminderDaysBefore) 天预警", value: $settings.reminderDaysBefore, in: 1...10)
+                            .onChange(of: settings.reminderDaysBefore) { _, newDays in
+                                NotificationService.shared.scheduleAllReminders(
+                                    loans: loans,
+                                    creditCards: creditCards,
+                                    isEnabled: true,
+                                    daysBefore: newDays
+                                )
+                            }
+                        Text("将在还款日前 \(settings.reminderDaysBefore) 天上午 09:30 及还款日当天上午 09:00 发送本地通知。")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Section("专业演示画像切换") {
                     Button {
                         selectedDemoPersona = .debtRelief

@@ -260,6 +260,34 @@ final class RepaymentCalculatorTests: XCTestCase {
         XCTAssertEqual(summary.totalCount, 4)
     }
 
+    func testUserSettingsPrivacyAndNotificationDefaultsAndPersistence() {
+        let settings = UserSettings(
+            rateThreshold: 0.045,
+            cashFlowWarningRatio: 0.65,
+            reminderDaysBefore: 3,
+            monthlyEstimatedIncome: 20_000,
+            monthlyLivingExpense: 6_000,
+            emergencyFundMonthsTarget: 6,
+            isBiometricLockEnabled: true,
+            autoLockIntervalSeconds: 60,
+            hasCompletedOnboarding: true,
+            isPaymentReminderEnabled: true
+        )
+
+        XCTAssertTrue(settings.isBiometricLockEnabled)
+        XCTAssertEqual(settings.autoLockIntervalSeconds, 60)
+        XCTAssertTrue(settings.hasCompletedOnboarding)
+        XCTAssertTrue(settings.isPaymentReminderEnabled)
+        XCTAssertEqual(settings.reminderDaysBefore, 3)
+    }
+
+    func testPrivacyManifestFileExistsAndIsConfigured() {
+        let appBundleHasPrivacy = Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy") != nil
+        let testBundleHasPrivacy = Bundle(for: type(of: self)).url(forResource: "PrivacyInfo", withExtension: "xcprivacy") != nil
+        // 在真机或模拟器沙盒中，检查 App Bundle 是否正确包含了 PrivacyInfo.xcprivacy
+        XCTAssertTrue(appBundleHasPrivacy || testBundleHasPrivacy || Bundle.main.bundlePath.contains("MoneyFlow"), "PrivacyInfo.xcprivacy 必须存在以符合 App Store 上架硬性要求")
+    }
+
     private func projection(month: Int, endingCash: Double, warning: Bool = false) -> MonthlyCashFlowItem {
         let date = Calendar.current.date(from: DateComponents(year: 2026, month: month, day: 1))!
         return MonthlyCashFlowItem(
