@@ -51,7 +51,7 @@ struct ContentView: View {
             .tint(Color.appPrimary)
 
             // 后台或锁定状态防窥遮罩
-            if (lockService.isLocked || (scenePhase != .active && currentSettings.isBiometricLockEnabled)) {
+            if lockService.isLocked || (scenePhase == .background && currentSettings.isBiometricLockEnabled) {
                 PrivacyBlurOverlayView()
                     .zIndex(100)
             }
@@ -78,10 +78,16 @@ struct ContentView: View {
                 }
             )
         }
+        .onAppear {
+            lockService.handleColdBoot(isEnabled: currentSettings.isBiometricLockEnabled)
+        }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .background:
-                lockService.handleAppDidEnterBackground(isEnabled: currentSettings.isBiometricLockEnabled)
+                lockService.handleAppDidEnterBackground(
+                    isEnabled: currentSettings.isBiometricLockEnabled,
+                    timeoutSeconds: currentSettings.autoLockIntervalSeconds
+                )
             case .active:
                 lockService.handleAppWillEnterForeground(
                     isEnabled: currentSettings.isBiometricLockEnabled,
