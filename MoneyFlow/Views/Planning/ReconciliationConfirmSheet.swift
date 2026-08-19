@@ -8,13 +8,14 @@ struct ReconciliationConfirmSheet: View {
     let sourceID: UUID
     let sourceName: String
     let sourceType: String
+    let isIncome: Bool
     let yearMonth: String
     let scheduledDate: Date
     let scheduledAmount: Double
     let accounts: [CashAccount]
 
     @State private var actualAmountString: String = ""
-    @State private var isDeductFromAccount: Bool = true
+    @State private var isSyncWithAccount: Bool = true
     @State private var selectedAccountID: UUID?
     @State private var notes: String = ""
 
@@ -31,7 +32,7 @@ struct ReconciliationConfirmSheet: View {
             Form {
                 Section {
                     HStack {
-                        Text("负债名称")
+                        Text(isIncome ? "收入项目" : "负债名称")
                             .foregroundStyle(.secondary)
                         Spacer()
                         Text(sourceName)
@@ -47,7 +48,7 @@ struct ReconciliationConfirmSheet: View {
                     }
 
                     HStack {
-                        Text("计划应还")
+                        Text(isIncome ? "预计收入" : "计划应还")
                             .foregroundStyle(.secondary)
                         Spacer()
                         Text("¥\(scheduledAmount, specifier: "%.2f")")
@@ -56,30 +57,30 @@ struct ReconciliationConfirmSheet: View {
                     }
 
                     HStack {
-                        Text("实扣金额")
+                        Text(isIncome ? "实收金额" : "实扣金额")
                             .foregroundStyle(.secondary)
                         Spacer()
                         TextField("金额", text: $actualAmountString)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .font(.system(.body, design: .rounded, weight: .bold))
-                            .foregroundStyle(Color.appPrimary)
+                            .foregroundStyle(isIncome ? .green : Color.appPrimary)
                     }
                 } header: {
                     Text("对账信息")
                 }
 
                 Section {
-                    Toggle("同步扣减现金账户余额", isOn: $isDeductFromAccount)
-                        .tint(Color.appPrimary)
+                    Toggle(isIncome ? "同步存入现金账户" : "同步扣减现金账户余额", isOn: $isSyncWithAccount)
+                        .tint(isIncome ? .green : Color.appPrimary)
 
-                    if isDeductFromAccount && !accounts.isEmpty {
-                        Picker("选择扣款账户", selection: $selectedAccountID) {
+                    if isSyncWithAccount && !accounts.isEmpty {
+                        Picker(isIncome ? "选择存入账户" : "选择扣款账户", selection: $selectedAccountID) {
                             ForEach(accounts) { account in
                                 HStack {
                                     Text(account.name)
                                     Spacer()
-                                    Text("可用 ¥\(account.balance, specifier: "%.2f")")
+                                    Text("当前 ¥\(account.balance, specifier: "%.2f")")
                                         .foregroundStyle(.secondary)
                                 }
                                 .tag(account.id as UUID?)
@@ -88,21 +89,24 @@ struct ReconciliationConfirmSheet: View {
 
                         if let acc = selectedAccount {
                             HStack {
-                                Text("扣款后预计余额")
+                                Text(isIncome ? "存入后预计余额" : "扣款后预计余额")
                                     .foregroundStyle(.secondary)
                                 Spacer()
-                                let remaining = acc.balance - parsedAmount
-                                Text("¥\(remaining, specifier: "%.2f")")
+                                let newBal = isIncome ? (acc.balance + parsedAmount) : (acc.balance - parsedAmount)
+                                Text("¥\(newBal, specifier: "%.2f")")
                                     .font(.system(.subheadline, design: .rounded, weight: .semibold))
-                                    .foregroundStyle(remaining < 0 ? .red : .secondary)
+                                    .foregroundStyle(newBal < 0 ? .red : (isIncome ? .green : .secondary))
                             }
                         }
                     }
                 } header: {
                     Text("资金账户联动")
                 } footer: {
-                    Text(isDeductFromAccount ? "确认对账后，系统将自动从所选账户扣除实还金额，保持资产与流水账目实时一致。" : "仅记录还款结清状态，不改变现金账户余额。")
-                        .font(.caption2)
+                    Text(isSyncWithAccount
+                         ? (isIncome ? "确认到账后，系统将自动向所选账户存入实发金额，更新总可用流动资金。" : "确认对账后，系统将自动从所选账户扣除实还金额，保持资产与流水账目实时一致。")
+                         : (isIncome ? "仅记录收入到账状态，不改变现金账户余额。" : "仅记录还款结清状态，不改变现金账户余额。")
+                    )
+                    .font(.caption2)
                 }
 
                 Section {
@@ -111,18 +115,18 @@ struct ReconciliationConfirmSheet: View {
                     Text("备注")
                 }
             }
-            .navigationTitle("还款对账确认")
+            .navigationTitle(isIncome ? "收入到账确认" : "还款对账确认")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("取消") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("确认结清") {
+                    Button(isIncome ? "确认已到账" : "确认结清") {
                         performReconciliation()
                     }
                     .fontWeight(.semibold)
-                    .tint(Color.appPrimary)
+                    .tint(isIncome ? .green : Color.appPrimary)
                 }
             }
             .onAppear {
@@ -136,9 +140,13 @@ struct ReconciliationConfirmSheet: View {
     private func performReconciliation() {
         let finalAmount = parsedAmount
 
-        // 1. 同步扣款
-        if isDeductFromAccount, let account = selectedAccount {
-            account.balance = max(0, account.balance - finalAmount)
+        // 1. 同步现金账户余额
+        if isSyncWithAccount, let account = selectedAccount {
+            if isIncome {
+                account.balance += finalAmount
+            } else {
+                account.balance = max(0, account.balance - finalAmount)
+            }
             account.updatedAt = Date()
         }
 
@@ -152,8 +160,9 @@ struct ReconciliationConfirmSheet: View {
             reconciledDate: Date(),
             scheduledAmount: scheduledAmount,
             actualAmount: finalAmount,
+            isIncome: isIncome,
             isReconciled: true,
-            deductedAccountID: isDeductFromAccount ? selectedAccountID : nil,
+            deductedAccountID: isSyncWithAccount ? selectedAccountID : nil,
             notes: notes
         )
         modelContext.insert(record)

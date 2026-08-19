@@ -169,18 +169,29 @@ enum CashFlowCalendarEngine {
             var dayInflows: [CalendarFlowItem] = []
             var dayOutflows: [CalendarFlowItem] = []
 
-            // 1. 发薪日注入
+            // 1. 发薪日注入与对账匹配
             if day == settings.paydayOfMonth && settings.monthlyEstimatedIncome > 0 {
+                let rec = monthReconciliations.first { $0.sourceType == "salary" }
+                let isReconciled = rec?.isReconciled ?? false
+                let amount = (rec?.isReconciled == true) ? (rec?.actualAmount ?? settings.monthlyEstimatedIncome) : settings.monthlyEstimatedIncome
+                let salarySourceID = rec?.sourceID ?? settings.id
+
                 dayInflows.append(CalendarFlowItem(
-                    sourceID: nil,
+                    sourceID: salarySourceID,
                     title: "工资收入",
-                    amount: settings.monthlyEstimatedIncome,
+                    amount: amount,
                     isIncome: true,
                     type: .salary,
-                    isReconciled: true,
+                    isReconciled: isReconciled,
                     icon: "banknote.fill",
-                    badgeText: "发薪"
+                    badgeText: isReconciled ? "已到账" : "待到账"
                 ))
+
+                if isReconciled {
+                    totalReconciled += 1
+                } else {
+                    totalPending += 1
+                }
             }
 
             // 2. 贷款还款日出账与对账状态匹配
@@ -237,7 +248,7 @@ enum CashFlowCalendarEngine {
                 }
             }
 
-            // 4. 自定义收支事件
+            // 4. 自定义收支事件与对账状态匹配
             for event in customEvents {
                 let eventDay = calendar.component(.day, from: event.date)
                 let eventMonth = calendar.component(.month, from: event.date)
@@ -245,20 +256,30 @@ enum CashFlowCalendarEngine {
 
                 let matchesMonth = event.isRecurringMonthly || (eventYear == year && eventMonth == month)
                 if matchesMonth && eventDay == day {
+                    let rec = reconciliationMap[event.id]
+                    let isReconciled = rec?.isReconciled ?? false
+                    let amount = (rec?.isReconciled == true) ? (rec?.actualAmount ?? event.amount) : event.amount
+
                     let flowItem = CalendarFlowItem(
                         sourceID: event.id,
                         title: event.title,
-                        amount: event.amount,
+                        amount: amount,
                         isIncome: event.isIncome,
                         type: event.isIncome ? .customIncome : .customExpense,
-                        isReconciled: true,
+                        isReconciled: isReconciled,
                         icon: event.icon,
-                        badgeText: event.isRecurringMonthly ? "每月" : nil
+                        badgeText: isReconciled ? (event.isIncome ? "已到账" : "已结清") : (event.isIncome ? "待到账" : "待还")
                     )
                     if event.isIncome {
                         dayInflows.append(flowItem)
                     } else {
                         dayOutflows.append(flowItem)
+                    }
+
+                    if isReconciled {
+                        totalReconciled += 1
+                    } else {
+                        totalPending += 1
                     }
                 }
             }
@@ -359,15 +380,20 @@ enum CashFlowCalendarEngine {
 
             // 发薪
             if dayNumber == settings.paydayOfMonth && settings.monthlyEstimatedIncome > 0 {
+                let rec = monthReconciliations.first { $0.sourceType == "salary" }
+                let isReconciled = rec?.isReconciled ?? false
+                let amount = (rec?.isReconciled == true) ? (rec?.actualAmount ?? settings.monthlyEstimatedIncome) : settings.monthlyEstimatedIncome
+                let salarySourceID = rec?.sourceID ?? settings.id
+
                 dayInflows.append(CalendarFlowItem(
-                    sourceID: nil,
+                    sourceID: salarySourceID,
                     title: "工资收入",
-                    amount: settings.monthlyEstimatedIncome,
+                    amount: amount,
                     isIncome: true,
                     type: .salary,
-                    isReconciled: true,
+                    isReconciled: isReconciled,
                     icon: "banknote.fill",
-                    badgeText: "发薪"
+                    badgeText: isReconciled ? "已到账" : "待到账"
                 ))
             }
 
@@ -418,14 +444,19 @@ enum CashFlowCalendarEngine {
                 let eventYear = calendar.component(.year, from: event.date)
                 let matches = event.isRecurringMonthly || (eventYear == year && eventMonth == month)
                 if matches && eventDay == dayNumber {
+                    let rec = reconciliationMap[event.id]
+                    let isReconciled = rec?.isReconciled ?? false
+                    let amount = (rec?.isReconciled == true) ? (rec?.actualAmount ?? event.amount) : event.amount
+
                     let flowItem = CalendarFlowItem(
                         sourceID: event.id,
                         title: event.title,
-                        amount: event.amount,
+                        amount: amount,
                         isIncome: event.isIncome,
                         type: event.isIncome ? .customIncome : .customExpense,
-                        isReconciled: true,
-                        icon: event.icon
+                        isReconciled: isReconciled,
+                        icon: event.icon,
+                        badgeText: isReconciled ? (event.isIncome ? "已到账" : "已结清") : (event.isIncome ? "待到账" : "待还")
                     )
                     if event.isIncome {
                         dayInflows.append(flowItem)

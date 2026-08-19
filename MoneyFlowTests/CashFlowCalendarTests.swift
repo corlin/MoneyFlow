@@ -100,8 +100,8 @@ final class CashFlowCalendarTests: XCTestCase {
         )
 
         XCTAssertEqual(projection.totalMonthOutflow, 5200 + 3000)
-        XCTAssertEqual(projection.totalReconciledCount, 1)
-        XCTAssertEqual(projection.totalPendingCount, 1)
+        XCTAssertEqual(projection.totalReconciledCount, 1) // 房贷已对账
+        XCTAssertEqual(projection.totalPendingCount, 2)    // 工资待到账 + 信用卡待结清
 
         // 15 号房贷出账且已对账
         let day15 = projection.dailySummaries.first { $0.dayNumber == 15 }!
@@ -207,5 +207,73 @@ final class CashFlowCalendarTests: XCTestCase {
         XCTAssertEqual(day20.totalInflow, 8000)
         XCTAssertEqual(day20.totalOutflow, 3500)
         XCTAssertEqual(day20.netChange, 4500)
+    }
+
+    func testSalaryReconciliationAndAccountDepositSync() {
+        let settings = UserSettings(monthlyEstimatedIncome: 20000, paydayOfMonth: 10)
+        let initialCash = 10000.0
+
+        let calendar = Calendar.current
+        var monthComponents = DateComponents()
+        monthComponents.year = 2026
+        monthComponents.month = 8
+        monthComponents.day = 1
+        let testDate = calendar.date(from: monthComponents)!
+
+        // 1. 未对账状态下的推演：使用预估 20000，标记待到账
+        let unreconciledProjection = CashFlowCalendarEngine.projectMonth(
+            for: testDate,
+            currentTotalCash: initialCash,
+            settings: settings,
+            loans: [],
+            creditCards: [],
+            customEvents: [],
+            reconciliations: []
+        )
+        let day10Unreconciled = unreconciledProjection.dailySummaries.first { $0.dayNumber == 10 }!
+        XCTAssertEqual(day10Unreconciled.totalInflow, 20000)
+        let salaryItem1 = day10Unreconciled.inflows.first!
+        XCTAssertFalse(salaryItem1.isReconciled)
+        XCTAssertEqual(salaryItem1.badgeText, "待到账")
+
+        // 2. 模拟对账：实发工资 22000 (含绩效奖金)，同步存入招行账户
+        let bankAccount = CashAccount(name: "招商银行借记卡", balance: initialCash)
+        let actualSalary = 22000.0
+
+        let salaryRec = PaymentReconciliationRecord(
+            sourceID: settings.id,
+            sourceName: "工资收入",
+            sourceType: "salary",
+            yearMonth: "2026-08",
+            scheduledDate: day10Unreconciled.date,
+            reconciledDate: Date(),
+            scheduledAmount: 20000,
+            actualAmount: actualSalary,
+            isIncome: true,
+            isReconciled: true,
+            deductedAccountID: bankAccount.id,
+            notes: "8月绩效到账"
+        )
+
+        // 模拟账户存款联动
+        bankAccount.balance += actualSalary
+        XCTAssertEqual(bankAccount.balance, 32000.0)
+
+        // 3. 对账后推演：日终水位基于实发金额 22000，标记已到账
+        let reconciledProjection = CashFlowCalendarEngine.projectMonth(
+            for: testDate,
+            currentTotalCash: initialCash,
+            settings: settings,
+            loans: [],
+            creditCards: [],
+            customEvents: [],
+            reconciliations: [salaryRec]
+        )
+        let day10Reconciled = reconciledProjection.dailySummaries.first { $0.dayNumber == 10 }!
+        XCTAssertEqual(day10Reconciled.totalInflow, 22000)
+        let salaryItem2 = day10Reconciled.inflows.first!
+        XCTAssertTrue(salaryItem2.isReconciled)
+        XCTAssertEqual(salaryItem2.badgeText, "已到账")
+        XCTAssertEqual(day10Reconciled.endingBalance, initialCash + 22000)
     }
 }

@@ -18,11 +18,13 @@ public final class PaymentReconciliationRecord {
     public var reconciledDate: Date? = nil
     /// 计划应还金额 (元)
     public var scheduledAmount: Double = 0
-    /// 实际扣款金额 (元)
+    /// 实际扣款/实收金额 (元)
     public var actualAmount: Double = 0
-    /// 是否已对账结清
+    /// 是否为收入进账 (true: 收入到账, false: 支出扣款)
+    public var isIncome: Bool = false
+    /// 是否已对账结清/已确认到账
     public var isReconciled: Bool = false
-    /// 扣款现金账户 ID (若进行了联动扣减)
+    /// 联动现金账户 ID (若进行了存入或扣减)
     public var deductedAccountID: UUID? = nil
     /// 备注
     public var notes: String = ""
@@ -39,6 +41,7 @@ public final class PaymentReconciliationRecord {
         reconciledDate: Date? = nil,
         scheduledAmount: Double,
         actualAmount: Double? = nil,
+        isIncome: Bool = false,
         isReconciled: Bool = false,
         deductedAccountID: UUID? = nil,
         notes: String = "",
@@ -54,6 +57,7 @@ public final class PaymentReconciliationRecord {
         self.reconciledDate = reconciledDate
         self.scheduledAmount = scheduledAmount
         self.actualAmount = actualAmount ?? scheduledAmount
+        self.isIncome = isIncome
         self.isReconciled = isReconciled
         self.deductedAccountID = deductedAccountID
         self.notes = notes

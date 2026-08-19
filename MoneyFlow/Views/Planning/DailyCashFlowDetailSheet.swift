@@ -150,10 +150,21 @@ struct DailyCashFlowDetailSheet: View {
             }
             .sheet(item: $itemToReconcile) { item in
                 if let sourceID = item.sourceID {
+                    let sType: String = {
+                        switch item.type {
+                        case .salary: return "salary"
+                        case .customIncome: return "customIncome"
+                        case .loanPayment: return "loan"
+                        case .creditCardPayment: return "creditCard"
+                        case .customExpense: return "customExpense"
+                        }
+                    }()
+
                     ReconciliationConfirmSheet(
                         sourceID: sourceID,
                         sourceName: item.title,
-                        sourceType: item.type == .loanPayment ? "loan" : "creditCard",
+                        sourceType: sType,
+                        isIncome: item.isIncome,
                         yearMonth: yearMonthKey,
                         scheduledDate: summary.date,
                         scheduledAmount: item.amount,
@@ -258,29 +269,27 @@ struct DailyCashFlowDetailSheet: View {
                     .font(.system(.body, design: .rounded, weight: .bold))
                     .foregroundStyle(item.isIncome ? .green : .primary)
 
-                if (item.type == .loanPayment || item.type == .creditCardPayment) {
-                    if item.isReconciled {
-                        HStack(spacing: 2) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.caption2)
-                            Text("已对账")
-                                .font(.caption2)
-                        }
-                        .foregroundStyle(.green)
-                    } else {
-                        Button {
-                            itemToReconcile = item
-                        } label: {
-                            Text("对账结清")
-                                .font(.system(size: 11, weight: .semibold))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Color.appPrimary)
-                                .foregroundColor(.white)
-                                .clipShape(Capsule())
-                        }
-                        .buttonStyle(.plain)
+                if item.isReconciled {
+                    HStack(spacing: 2) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption2)
+                        Text(item.isIncome ? "已到账" : "已结清")
+                            .font(.caption2)
                     }
+                    .foregroundStyle(.green)
+                } else {
+                    Button {
+                        itemToReconcile = item
+                    } label: {
+                        Text(item.isIncome ? "确认到账" : "对账结清")
+                            .font(.system(size: 11, weight: .semibold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(item.isIncome ? Color.green : Color.appPrimary)
+                            .foregroundColor(.white)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }

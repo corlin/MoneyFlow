@@ -37,9 +37,10 @@ MoneyFlow 是一款使用 SwiftUI 与 SwiftData 构建的本地优先 iOS 专业
 - **日级动态资金水位流转推演**：
   - 以实时可用现金为基点，结合发薪日（`paydayOfMonth`）与负债还款日，精确推演当月及未来 30 天**每一天的日终结余水位**。
   - **智能流动性缺口预警**：当某天出账后预计余额低于 1 个月刚性安全防线时触发橙色预警，发生穿底透支（$<0$）时触发红色强预警。
-- **智能还款对账与账户资金联动**：
-  - 独立 SwiftData 实体 [`PaymentReconciliationRecord`](file:///Users/corlin/2026/MoneyFlow/MoneyFlow/Models/PaymentReconciliationRecord.swift) 记录按月实还金额、结清状态与备注，历史账目可精确回溯。
-  - 轻触一键对账结清，支持在弹窗中选择「同步扣减指定现金账户余额」，保持账本与银行卡实际资金严密一致。
+- **全双向智能对账与账户资金联动**：
+  - 独立 SwiftData 实体 [`PaymentReconciliationRecord`](file:///Users/corlin/2026/MoneyFlow/MoneyFlow/Models/PaymentReconciliationRecord.swift) 记录按月实还/实收金额、结清/到账状态与备注，历史账目可精确回溯。
+  - **支出还款对账**：轻触一键对账结清，支持在弹窗中选择「同步扣减指定现金账户余额」，保持账本与银行卡实际资金严密一致。
+  - **收入进账对账**：发薪日（`paydayOfMonth`）或自定义收入日前标记为「待到账 🟢」，到账后轻点「确认到账」，支持微调实发金额并「同步存入指定银行账户」，自动递增可用流动资金。
 - **自定义收支事件支持**：
   - 独立实体 [`CustomCashFlowEvent`](file:///Users/corlin/2026/MoneyFlow/MoneyFlow/Models/CustomCashFlowEvent.swift) 支持用户添加单次大额（如奖金、车险保费）或每月周期性收支，精准融入现金流日历。
 
@@ -146,8 +147,9 @@ xcodebuild test \
   -only-testing:MoneyFlowTests
 ```
 
-测试套件共 **39 项单元测试**，覆盖：
+测试套件共 **40 项单元测试**，覆盖：
 - 周期性现金流日历发薪注入、逐日水位递推与流动性缺口预警 (`CashFlowCalendarTests`)
+- 工资收入实发对账、税后/绩效微调与银行卡存款联动 (`testSalaryReconciliationAndAccountDepositSync`)
 - 贷款与信用卡还款日出账映射、对账记录状态流转与自定义收支事件
 - 提前还贷 vs 稳健理财机会成本精算、保本临界利率与流动性护栏 (`OpportunityCostTests`)
 - 多目标优先级动态灌溉与 ETA 预测 (`CFPPlanningEngineTests`)
@@ -178,7 +180,7 @@ MoneyFlow/
 ├── Components/           # 通用 SwiftUI 组件与三段式资金进度条
 ├── Extensions/           # 日期、金额、高精度利率格式化、主题与流体物理动力学扩展
 ├── MoneyFlowWidgets/     # WidgetKit 扩展 Target (Small/Medium/AccessoryRectangular/AccessoryCircular)
-└── MoneyFlowTests/       # 39 项单元测试矩阵
+└── MoneyFlowTests/       # 40 项单元测试矩阵
 ```
 
 ---
