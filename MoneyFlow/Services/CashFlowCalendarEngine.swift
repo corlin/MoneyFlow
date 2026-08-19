@@ -67,7 +67,14 @@ struct DailyCashFlowSummary: Identifiable, Equatable {
     var isShortfallRisk: Bool
     var isDeficitRisk: Bool
     var allOutflowsReconciled: Bool
+    var allInflowsReconciled: Bool
     var pendingReconciliationCount: Int
+
+    var allEventsReconciled: Bool {
+        let inRec = inflows.isEmpty || allInflowsReconciled
+        let outRec = outflows.isEmpty || allOutflowsReconciled
+        return inRec && outRec
+    }
 
     var netChange: Double {
         totalInflow - totalOutflow
@@ -304,7 +311,8 @@ enum CashFlowCalendarEngine {
             if isDeficit { deficitCount += 1 }
 
             let allOutflowsReconciled = dayOutflows.isEmpty || dayOutflows.allSatisfy { $0.isReconciled }
-            let pendingCount = dayOutflows.filter { !$0.isReconciled }.count
+            let allInflowsReconciled = dayInflows.isEmpty || dayInflows.allSatisfy { $0.isReconciled }
+            let pendingCount = dayInflows.filter { !$0.isReconciled }.count + dayOutflows.filter { !$0.isReconciled }.count
 
             summaries.append(DailyCashFlowSummary(
                 dateKey: dayKey,
@@ -320,6 +328,7 @@ enum CashFlowCalendarEngine {
                 isShortfallRisk: isShortfall,
                 isDeficitRisk: isDeficit,
                 allOutflowsReconciled: allOutflowsReconciled,
+                allInflowsReconciled: allInflowsReconciled,
                 pendingReconciliationCount: pendingCount
             ))
         }
@@ -474,8 +483,9 @@ enum CashFlowCalendarEngine {
 
             let isShortfall = (endBal < safetyThreshold)
             let isDeficit = (endBal < 0)
-            let allReconciled = dayOutflows.isEmpty || dayOutflows.allSatisfy { $0.isReconciled }
-            let pendingCount = dayOutflows.filter { !$0.isReconciled }.count
+            let allOutflowsReconciled = dayOutflows.isEmpty || dayOutflows.allSatisfy { $0.isReconciled }
+            let allInflowsReconciled = dayInflows.isEmpty || dayInflows.allSatisfy { $0.isReconciled }
+            let pendingCount = dayInflows.filter { !$0.isReconciled }.count + dayOutflows.filter { !$0.isReconciled }.count
 
             results.append(DailyCashFlowSummary(
                 dateKey: dayKey,
@@ -490,7 +500,8 @@ enum CashFlowCalendarEngine {
                 outflows: dayOutflows,
                 isShortfallRisk: isShortfall,
                 isDeficitRisk: isDeficit,
-                allOutflowsReconciled: allReconciled,
+                allOutflowsReconciled: allOutflowsReconciled,
+                allInflowsReconciled: allInflowsReconciled,
                 pendingReconciliationCount: pendingCount
             ))
         }

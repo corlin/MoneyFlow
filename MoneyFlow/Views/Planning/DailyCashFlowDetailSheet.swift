@@ -10,8 +10,60 @@ struct DailyCashFlowDetailSheet: View {
     let accounts: [CashAccount]
     let onRefresh: () -> Void
 
+    @Query private var reconciliations: [PaymentReconciliationRecord]
     @State private var itemToReconcile: CalendarFlowItem?
     @State private var showingAddEventSheet = false
+
+    private var dynamicInflows: [CalendarFlowItem] {
+        summary.inflows.map { item in
+            var updated = item
+            if let rec = reconciliations.first(where: {
+                $0.yearMonth == yearMonthKey && (
+                    (item.type == .salary && $0.sourceType == "salary") ||
+                    ($0.sourceID == item.sourceID)
+                )
+            }) {
+                updated.isReconciled = rec.isReconciled
+                if rec.isReconciled {
+                    updated.amount = rec.actualAmount
+                    updated.badgeText = "已到账"
+                }
+            }
+            return updated
+        }
+    }
+
+    private var dynamicOutflows: [CalendarFlowItem] {
+        summary.outflows.map { item in
+            var updated = item
+            if let rec = reconciliations.first(where: {
+                $0.yearMonth == yearMonthKey && $0.sourceID == item.sourceID
+            }) {
+                updated.isReconciled = rec.isReconciled
+                if rec.isReconciled {
+                    updated.amount = rec.actualAmount
+                    updated.badgeText = "已结清"
+                }
+            }
+            return updated
+        }
+    }
+
+    private var dynamicTotalInflow: Double {
+        dynamicInflows.reduce(0.0) { $0 + $1.amount }
+    }
+
+    private var dynamicTotalOutflow: Double {
+        dynamicOutflows.reduce(0.0) { $0 + $1.amount }
+    }
+
+    private var dynamicEndingBalance: Double {
+        summary.startingBalance + dynamicTotalInflow - dynamicTotalOutflow
+    }
+
+    private var dynamicPendingCount: Int {
+        dynamicInflows.filter { !$0.isReconciled }.count + dynamicOutflows.filter { !$0.isReconciled }.count
+    }
 
     private var formattedDateString: String {
         let formatter = DateFormatter()
@@ -38,7 +90,7 @@ struct DailyCashFlowDetailSheet: View {
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                     .foregroundStyle(.red)
-                                Text("当日扣款后账户预计穿底透支 (¥\(summary.endingBalance, specifier: "%.2f"))，请提前归集可用资金。")
+                                Text("当日扣款后账户预计穿底透支 (¥\(dynamicEndingBalance, specifier: "%.2f"))，请提前归集可用资金。")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -69,40 +121,52 @@ struct DailyCashFlowDetailSheet: View {
                     }
 
                     // 进账明细
-                    if !summary.inflows.isEmpty {
+                    if !dynamicInflows.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("🟢 预计进账 (\(summary.inflows.count) 笔)")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.secondary)
+                            HStack {
+                                Text("🟢 进账明细 (\(dynamicInflows.count) 笔)")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                if dynamicInflows.allSatisfy({ $0.isReconciled }) {
+                                    Text("已全部到账 ✅")
+                                        .font(.caption2)
+                                        .foregroundStyle(.green)
+                                } else {
+                                    Text("\(dynamicInflows.filter { !$0.isReconciled }.count) 笔待到账")
+                                        .font(.caption2)
+                                        .foregroundStyle(.orange)
+                                }
+                            }
 
-                            ForEach(summary.inflows) { item in
+                            ForEach(dynamicInflows) { item in
                                 flowItemRow(item: item)
                             }
                         }
                     }
 
                     // 出账与对账明细
-                    if !summary.outflows.isEmpty {
+                    if !dynamicOutflows.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
-                                Text("🔴 预计出账 (\(summary.outflows.count) 笔)")
+                                Text("🔴 出账明细 (\(dynamicOutflows.count) 笔)")
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .foregroundStyle(.secondary)
                                 Spacer()
-                                if summary.pendingReconciliationCount > 0 {
-                                    Text("\(summary.pendingReconciliationCount) 笔待对账")
-                                        .font(.caption2)
-                                        .foregroundStyle(.orange)
-                                } else {
+                                if dynamicOutflows.allSatisfy({ $0.isReconciled }) {
                                     Text("已全部结清 ✅")
                                         .font(.caption2)
                                         .foregroundStyle(.green)
+                                } else {
+                                    Text("\(dynamicOutflows.filter { !$0.isReconciled }.count) 笔待结清")
+                                        .font(.caption2)
+                                        .foregroundStyle(.orange)
                                 }
                             }
 
-                            ForEach(summary.outflows) { item in
+                            ForEach(dynamicOutflows) { item in
                                 flowItemRow(item: item)
                             }
                         }
@@ -204,9 +268,9 @@ struct DailyCashFlowDetailSheet: View {
                     Text("日终推演水位")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                    Text("¥\(summary.endingBalance, specifier: "%.2f")")
+                    Text("¥\(dynamicEndingBalance, specifier: "%.2f")")
                         .font(.system(.subheadline, design: .monospaced, weight: .bold))
-                        .foregroundStyle(summary.endingBalance < 0 ? .red : (summary.isShortfallRisk ? .orange : .primary))
+                        .foregroundStyle(dynamicEndingBalance < 0 ? .red : (summary.isShortfallRisk ? .orange : .primary))
                 }
             }
 
@@ -217,7 +281,7 @@ struct DailyCashFlowDetailSheet: View {
                     Image(systemName: "arrow.down.left")
                         .font(.caption2)
                         .foregroundStyle(.green)
-                    Text("进账 +¥\(summary.totalInflow, specifier: "%.2f")")
+                    Text("进账 +¥\(dynamicTotalInflow, specifier: "%.2f")")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -226,7 +290,7 @@ struct DailyCashFlowDetailSheet: View {
                     Image(systemName: "arrow.up.right")
                         .font(.caption2)
                         .foregroundStyle(.red)
-                    Text("出账 -¥\(summary.totalOutflow, specifier: "%.2f")")
+                    Text("出账 -¥\(dynamicTotalOutflow, specifier: "%.2f")")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

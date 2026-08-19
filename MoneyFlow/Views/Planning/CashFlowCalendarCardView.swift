@@ -229,17 +229,25 @@ struct CashFlowCalendarCardView: View {
 
                 // 状态指示点与微胶囊
                 HStack(spacing: 2) {
+                    // 1. 进账状态
                     if summary.totalInflow > 0 {
-                        Circle()
-                            .fill(Color.green)
-                            .frame(width: 5, height: 5)
+                        if summary.allInflowsReconciled {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 7, weight: .bold))
+                                .foregroundColor(.green)
+                        } else {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 5, height: 5)
+                        }
                     }
 
+                    // 2. 出账状态
                     if summary.totalOutflow > 0 {
                         if summary.allOutflowsReconciled {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 6, weight: .bold))
-                                .foregroundColor(.green)
+                                .font(.system(size: 7, weight: .bold))
+                                .foregroundColor(summary.totalInflow > 0 ? Color.appPrimary : .green)
                         } else {
                             Circle()
                                 .fill(Color.red)
@@ -247,6 +255,7 @@ struct CashFlowCalendarCardView: View {
                         }
                     }
 
+                    // 3. 风险状态
                     if summary.isDeficitRisk {
                         Circle()
                             .fill(Color.red)
@@ -257,7 +266,7 @@ struct CashFlowCalendarCardView: View {
                             .frame(width: 5, height: 5)
                     }
                 }
-                .frame(height: 6)
+                .frame(height: 7)
             }
             .frame(maxWidth: .infinity, minHeight: 48)
             .background(
