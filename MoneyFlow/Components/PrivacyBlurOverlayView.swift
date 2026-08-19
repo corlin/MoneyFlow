@@ -8,12 +8,12 @@ public struct PrivacyBlurOverlayView: View {
 
     public var body: some View {
         ZStack {
-            // 背景毛玻璃遮罩
+            // 背景深度高斯毛玻璃防窥遮罩
             Rectangle()
-                .fill(.ultraThinMaterial)
+                .fill(.ultraThickMaterial)
                 .ignoresSafeArea()
 
-            Color.black.opacity(0.18)
+            Color(.systemBackground).opacity(0.75)
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {

@@ -12,6 +12,8 @@ struct ContentView: View {
     @State private var selectedTab = 0
     @ObservedObject private var lockService = BiometricLockService.shared
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var currentSettings: UserSettings {
         if let existing = settingsList.first {
             return existing
@@ -19,6 +21,10 @@ struct ContentView: View {
         let initial = UserSettings()
         modelContext.insert(initial)
         return initial
+    }
+
+    private var isPrivacyShieldActive: Bool {
+        lockService.isLocked || (scenePhase == .background && currentSettings.isBiometricLockEnabled)
     }
 
     var body: some View {
@@ -49,9 +55,12 @@ struct ContentView: View {
                     .tag(3)
             }
             .tint(Color.appPrimary)
+            .blur(radius: isPrivacyShieldActive ? 24 : 0)
+            .allowsHitTesting(!isPrivacyShieldActive)
+            .animation(AppMotion.animation(for: .spatial, reduceMotion: reduceMotion), value: isPrivacyShieldActive)
 
             // 后台或锁定状态防窥遮罩
-            if lockService.isLocked || (scenePhase == .background && currentSettings.isBiometricLockEnabled) {
+            if isPrivacyShieldActive {
                 PrivacyBlurOverlayView()
                     .zIndex(100)
             }
