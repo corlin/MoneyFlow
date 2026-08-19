@@ -31,7 +31,16 @@ struct MoneyFlowApp: App {
     }
 
     private static var schema: Schema {
-        Schema([CashAccount.self, Loan.self, CreditCard.self, UserSettings.self, FinancialGoal.self, LoanAdjustmentEvent.self])
+        Schema([
+            CashAccount.self,
+            Loan.self,
+            CreditCard.self,
+            UserSettings.self,
+            FinancialGoal.self,
+            LoanAdjustmentEvent.self,
+            PaymentReconciliationRecord.self,
+            CustomCashFlowEvent.self
+        ])
     }
 
     private static var storeURL: URL {

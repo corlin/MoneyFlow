@@ -16,6 +16,9 @@ public final class UserSettings {
     // 预计每月现金净流入（用于现金流时间线预测，如工资等，默认 0）
     public var monthlyEstimatedIncome: Double = 0
 
+    // 每月固定发薪日（1~31，默认 10 号）
+    public var paydayOfMonth: Int = 10
+
     // 每月刚性基础生活支出（用于计算自由现金流与应急缓冲金基数，默认 0）
     public var monthlyLivingExpense: Double = 0
 
@@ -43,6 +46,7 @@ public final class UserSettings {
         cashFlowWarningRatio: Double = 0.70,
         reminderDaysBefore: Int = 5,
         monthlyEstimatedIncome: Double = 0,
+        paydayOfMonth: Int = 10,
         monthlyLivingExpense: Double = 0,
         emergencyFundMonthsTarget: Int = 3,
         isBiometricLockEnabled: Bool = false,
@@ -57,6 +61,7 @@ public final class UserSettings {
         self.cashFlowWarningRatio = cashFlowWarningRatio
         self.reminderDaysBefore = reminderDaysBefore
         self.monthlyEstimatedIncome = monthlyEstimatedIncome
+        self.paydayOfMonth = paydayOfMonth
         self.monthlyLivingExpense = monthlyLivingExpense
         self.emergencyFundMonthsTarget = emergencyFundMonthsTarget
         self.isBiometricLockEnabled = isBiometricLockEnabled

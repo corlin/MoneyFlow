@@ -10,6 +10,8 @@ struct PlanningTab: View {
     @Query private var creditCards: [CreditCard]
     @Query private var goals: [FinancialGoal]
     @Query private var userSettingsList: [UserSettings]
+    @Query private var reconciliations: [PaymentReconciliationRecord]
+    @Query private var customEvents: [CustomCashFlowEvent]
 
     @State private var scenario: PlanningScenario = .baseline
     @State private var showCommittedToast = false
@@ -44,6 +46,16 @@ struct PlanningTab: View {
                 VStack(spacing: 18) {
                     // 顶部流动性与分账快速概览条
                     planningSummaryHeader(result: projectionResult)
+
+                    // 周期性现金流全景日历与智能对账
+                    CashFlowCalendarCardView(
+                        accounts: cashAccounts,
+                        loans: loans,
+                        creditCards: creditCards,
+                        settings: settings,
+                        reconciliations: reconciliations,
+                        customEvents: customEvents
+                    )
 
                     // 机会成本精算快捷入口卡片
                     opportunityCostBanner

@@ -39,6 +39,8 @@ enum DemoDataService {
             for card in try context.fetch(FetchDescriptor<CreditCard>()) { context.delete(card) }
             for goal in try context.fetch(FetchDescriptor<FinancialGoal>()) { context.delete(goal) }
             for event in try context.fetch(FetchDescriptor<LoanAdjustmentEvent>()) { context.delete(event) }
+            for rec in try context.fetch(FetchDescriptor<PaymentReconciliationRecord>()) { context.delete(rec) }
+            for customEvent in try context.fetch(FetchDescriptor<CustomCashFlowEvent>()) { context.delete(customEvent) }
         }
 
         // 获取或初始化 UserSettings
