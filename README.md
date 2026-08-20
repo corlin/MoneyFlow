@@ -8,7 +8,18 @@ MoneyFlow 是一款使用 SwiftUI 与 SwiftData 构建的本地优先 iOS 专业
 
 ## 核心能力
 
-### 1. 提前还贷 vs 稳健理财五维机会成本精算器（Opportunity Cost Engine）
+### 1. 今日安全可花与智能备款助手（Safe-to-Spend & Smart Buffer Advisor）- 素人友好升级
+- **今日随心花（Daily Safe-to-Spend）**：
+  - 核心公式：$\text{SafeSpend}_{\text{month}} = \max(0, \text{流动现金} + \text{待入账收入} - \text{本月待还房贷车贷信用卡} - \text{本月剩余生活底线} - \text{应急储备防线})$。
+  - 单日平摊：将本月剩余自由闲钱智能平摊至剩余天数，每天打开 App 第一眼大字号展示 **「今日安全可花 ¥320 · 安心花 🟢」**，不用动脑算账即可放心消费。
+- **智能备款与缺口转账诊断（Buffer Alert）**：
+  - 自动扫描未来 7 天内即将扣款的贷款与信用卡，与当前可用资金智能比对。
+  - **资金充足时**：贴心提示 **「近 7 天还款资金已备齐 ✅」**；
+  - **存在缺口时**：橙色预警提示 **「3天后房贷扣款 ¥5,200，当前缺口 ¥2,200，建议尽快转入备齐 ⚠️」**。
+- **全域金融黑话人话翻译**：
+  - 告别晦涩专业缩写：`DSR` $\rightarrow$ **「还贷压力：轻松 🟢」**，`应急月数` $\rightarrow$ **「家庭抗风险底气：充足 🛡️」**，`BEP` $\rightarrow$ **「大白话理财 vs 还贷收益对比建议」**。
+
+### 2. 提前还贷 vs 稳健理财五维机会成本精算器（Opportunity Cost Engine）
 - **五维全景精算**：
   - **贷款省息精算**：精确计算提前还本（缩短年限 / 减少月供）在剩余期限内节省的累计总利息 $\Delta I_{loan}$。
   - **理财复利回报对标**：在相同对标周期 $M$ 内，计算闲钱本金 $P$ 以预期年化收益率 $r_{inv}$ 产生的按月复利终值 $P(1 + r_{inv}/12)^M - P$。
@@ -168,20 +179,14 @@ xcodebuild test \
 
 ```text
 MoneyFlow/
-├── App/                  # 应用入口、4-Tab 导航、Deep Link 路由与存储恢复
-├── Models/               # SwiftData 模型 (FinancialGoal, UserSettings, Loan, LoanAdjustmentEvent, CashAccount, CreditCard, PaymentReconciliationRecord, CustomCashFlowEvent) 与小组件快照 (WidgetSnapshotData)
-├── Services/             # 现金流日历引擎 (CashFlowCalendarEngine)、机会成本引擎 (OpportunityCostEngine)、小组件快照服务 (WidgetSnapshotService)、多目标引擎 (MultiGoalEngine)、双轨推演 (CashFlowProjector)、诊断 (RiskAnalyzer)、OCR解析器 (LoanOCRScannerService)、分段重算引擎 (RepaymentCalculator)、示例数据
-├── Views/
-│   ├── Overview/         # 概览中枢与 CFP 财务韧性中枢 (FinancialResilienceHubView)
-│   ├── Planning/         # 规划沙盘 (DynamicCashFlowSandboxView)、现金流全景日历卡片 (CashFlowCalendarCardView)、单日流水抽屉 (DailyCashFlowDetailSheet)、智能对账确认 (ReconciliationConfirmSheet)、自定义收支表单 (CustomCashFlowEventFormSheet)、机会成本精算器 (OpportunityCostCalculatorView) 与多目标矩阵
-│   ├── Assets/           # 资产与已锁定/自由现金拆解
-│   ├── Liabilities/      # 负债与还款日程、贷款详情 (LoanDetailView)、调息还贷向导 (LoanAdjustmentEventSheet)、截图批量录入 (BatchLoanOCRImportSheet)
-│   └── Settings/         # 设置与双画像切换
-├── Components/           # 通用 SwiftUI 组件与三段式资金进度条
-├── Extensions/           # 日期、金额、高精度利率格式化、主题与流体物理动力学扩展
-├── MoneyFlowWidgets/     # WidgetKit 扩展 Target (Small/Medium/AccessoryRectangular/AccessoryCircular)
-└── MoneyFlowTests/       # 40 项单元测试矩阵
-```
+├── App/                  # 应用入口与生命周期管理
+├── Components/           # 通用原子 UI 组件
+├── Extensions/           # 原生扩展（Date、Decimal、Theme、Motion）
+├── Models/               # SwiftData 实体模型定义
+├── Services/             # 核心计算引擎（Safe-to-Spend、CFP、OCR、对账）
+├── Views/                # SwiftUI 界面
+├── MoneyFlowWidgets/     # WidgetKit 桌面与锁屏小组件扩展
+└── MoneyFlowTests/       # 43 项单元测试矩阵
 
 ---
 

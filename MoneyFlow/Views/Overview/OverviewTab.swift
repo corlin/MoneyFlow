@@ -9,6 +9,8 @@ struct OverviewTab: View {
     @Query private var creditCards: [CreditCard]
     @Query private var goals: [FinancialGoal]
     @Query private var userSettingsList: [UserSettings]
+    @Query private var reconciliations: [PaymentReconciliationRecord]
+    @Query private var customEvents: [CustomCashFlowEvent]
 
     var selectedTab: Binding<Int>?
     var onExplorePlanning: (() -> Void)?
@@ -37,6 +39,18 @@ struct OverviewTab: View {
     private var emergencyTargetMonths: Int { settings?.emergencyFundMonthsTarget ?? 3 }
     private var totalCash: Double { accounts.reduce(0) { $0 + $1.balance } }
     private var hasAnyData: Bool { !accounts.isEmpty || !loans.isEmpty || !creditCards.isEmpty || !goals.isEmpty }
+
+    private var safeToSpendResult: SafeToSpendResult {
+        SafeToSpendEngine.calculate(
+            today: Date(),
+            accounts: accounts,
+            loans: loans,
+            creditCards: creditCards,
+            settings: settings ?? UserSettings(),
+            reconciliations: reconciliations,
+            customEvents: customEvents
+        )
+    }
 
     private var debtAnalysis: DebtHealthAnalysis {
         RiskAnalyzer.analyze(
@@ -139,7 +153,10 @@ struct OverviewTab: View {
 
     private var populatedOverview: some View {
         LazyVStack(spacing: 16) {
-            // 模块 1: CFP 财务韧性与健康中枢 (整合生命线指标、黄金建议与净现金头寸)
+            // 模块 0: 今日安全随心花与备款助手 (Safe-to-Spend Hero Card)
+            SafeToSpendHeroCard(result: safeToSpendResult)
+
+            // 模块 1: 财务韧性与健康中枢 (整合生命线指标、黄金建议与净现金头寸)
             FinancialResilienceHubView(analysis: debtAnalysis) {
                 if let onExplorePlanning {
                     onExplorePlanning()
