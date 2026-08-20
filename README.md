@@ -6,6 +6,20 @@ MoneyFlow 是一款使用 SwiftUI 与 SwiftData 构建的本地优先 iOS 专业
 
 ---
 
+## 界面展示
+
+<div align="center">
+
+| 概览 · 今日随心花与财务看板 | 规划 · 现金流日历与沙盘 |
+| :---: | :---: |
+| <img src="docs/screenshots/01_overview.png" width="340" alt="概览"/> | <img src="docs/screenshots/02_planning.png" width="340" alt="规划"/> |
+| **资产 · 账户与已分账现金** | **负债 · 房贷调息与提前还款** |
+| <img src="docs/screenshots/03_assets.png" width="340" alt="资产"/> | <img src="docs/screenshots/04_liabilities.png" width="340" alt="负债"/> |
+
+</div>
+
+---
+
 ## 核心能力
 
 ### 1. 30秒极速新手向导与生活心愿罐（Quick Onboarding & Wishlist Jars）- 素人友好升级
