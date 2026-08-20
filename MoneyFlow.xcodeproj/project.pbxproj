@@ -21,8 +21,10 @@
 		2183550BC8A62C120BE386AF /* CashFlowCalendarCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4667E723A79CF1281C706DAF /* CashFlowCalendarCardView.swift */; };
 		227CC344351F7BA8537A4EF9 /* Loan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6168CAFB5E98ACF255302976 /* Loan.swift */; };
 		22A87A47AB0F77707DD2907B /* OpportunityCostCalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456944FB391763405C686F44 /* OpportunityCostCalculatorView.swift */; };
+		249B63AF781617CBDACD5952 /* WishlistQuickAddSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D72C54D08923365F738B255 /* WishlistQuickAddSheet.swift */; };
 		2EFFE4CBAEBF7A493BA02EE4 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6981D869AAC2BB8CAA1C0EC /* Color+Theme.swift */; };
 		2F8E462B3F30DB1B031BC425 /* LoanAdjustmentEventSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2976F7F73941BFDB1F69AD57 /* LoanAdjustmentEventSheet.swift */; };
+		3200D7723109207FE29A71E6 /* QuickOnboardingWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C8AC0EC7A8FD9431C6BDA3 /* QuickOnboardingWizardView.swift */; };
 		37495EDCD9333B7DB0FFC9DB /* MoneyFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287EBA5F3FDF7439D59B590C /* MoneyFlowUITests.swift */; };
 		3AACD59F405A165BE18A5282 /* CashFlowCalendarEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C50E789C6B9DB237C1EED1 /* CashFlowCalendarEngine.swift */; };
 		3B2CD2BAC7B759D91D34BEE4 /* LoanDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC571A50F746802EB286991 /* LoanDetailView.swift */; };
@@ -32,6 +34,7 @@
 		511FFF1F40930D4E6EE2B7D5 /* PersistenceRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 392C1A4FDFA74290C7A87CE6 /* PersistenceRecoveryView.swift */; };
 		52110F32AC3A4436CB189E59 /* PlanningTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7CF0BE677BBFBF7CD1648AC /* PlanningTab.swift */; };
 		52B9DE56A4E8F41FC69581F0 /* RepaymentCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8352F1BD78450FF6559 /* RepaymentCalculatorTests.swift */; };
+		53B68657AC48E5B051C5095E /* WishlistAndOnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2E76C129B783825C08CB07 /* WishlistAndOnboardingTests.swift */; };
 		56295DCB8DFD780453AB8A8E /* CashFlowChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 904D5DFB3F23A7069B62A22F /* CashFlowChart.swift */; };
 		572C7B72750F71C86BAEF19F /* RiskAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92068B5742CA987B0D04B7A8 /* RiskAnalyzer.swift */; };
 		58F628E461864B094B9AC427 /* GoalCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EAA7218202D645F8DA8FD1F /* GoalCardView.swift */; };
@@ -48,6 +51,7 @@
 		78E50A7FABB28E621AEE33FB /* CashFlowProjector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0817CA82FA37A84E5ACEE6DE /* CashFlowProjector.swift */; };
 		79F1181298D55BF2F134B845 /* OpportunityCostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433BA597170858C7976C91D0 /* OpportunityCostTests.swift */; };
 		7B2A645AA4781B45BD834A2C /* CreditCardRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB470C46762E016E55975FED /* CreditCardRow.swift */; };
+		7FD0B2E254DA8FADE97EE9C0 /* WishlistTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 124F03BB8BC96FC2E55AB676 /* WishlistTemplate.swift */; };
 		84417F2FC442C45D185C4891 /* DynamicCashFlowSandboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFBF7A09A50020B705870E57 /* DynamicCashFlowSandboxView.swift */; };
 		847E7C2F877977ED0B9840E6 /* MoneyFlowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DF4C823BC1A37D4DBA40A9 /* MoneyFlowApp.swift */; };
 		84DFA3DEC38DFBBA21594D14 /* DailyCashFlowDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9C85CDFBA0F5D81A28ED7B /* DailyCashFlowDetailSheet.swift */; };
@@ -84,6 +88,7 @@
 		E882F5F0980A9A30D21B20D2 /* CashAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D006EBAE0C1DD4BA92BB8E29 /* CashAccount.swift */; };
 		EDDC45D4B28E0FD341D0EAF5 /* MoneyFlowWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB97E8E68F805BD4F834AA2B /* MoneyFlowWidgetsBundle.swift */; };
 		F1F4432E3965E592300C6103 /* FinancialDataExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44AA8E1662F2105941AE3EEA /* FinancialDataExport.swift */; };
+		F50858EF518DE03DAB9266BC /* WishlistJarCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E245F4B7C53C42247D82900E /* WishlistJarCardView.swift */; };
 		FB653EDA20683CDDFB5CD8EE /* DemoDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBEB2B76BDD67F49E7BF5675 /* DemoDataService.swift */; };
 		FD6111CEFC6D8610710B7206 /* HealthBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A25A9D2F9C050CD971A410 /* HealthBadge.swift */; };
 /* End PBXBuildFile section */
@@ -131,6 +136,7 @@
 		0817CA82FA37A84E5ACEE6DE /* CashFlowProjector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowProjector.swift; sourceTree = "<group>"; };
 		097A40112A60B9E9F2802885 /* PrivacyBlurOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyBlurOverlayView.swift; sourceTree = "<group>"; };
 		0EAA7218202D645F8DA8FD1F /* GoalCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCardView.swift; sourceTree = "<group>"; };
+		124F03BB8BC96FC2E55AB676 /* WishlistTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistTemplate.swift; sourceTree = "<group>"; };
 		155180D9E16BECCA6A34254E /* LoanOCRScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanOCRScannerService.swift; sourceTree = "<group>"; };
 		164D640D05E96875DF869363 /* BiometricLockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricLockService.swift; sourceTree = "<group>"; };
 		18A0F9F06578808EAF3842F3 /* CustomCashFlowEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCashFlowEvent.swift; sourceTree = "<group>"; };
@@ -156,6 +162,7 @@
 		4CD4504F0F9F7A855778752D /* MoneyFlow.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MoneyFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57C50E789C6B9DB237C1EED1 /* CashFlowCalendarEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowCalendarEngine.swift; sourceTree = "<group>"; };
 		5965522D496ABCA5EDC28942 /* LoanRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanRow.swift; sourceTree = "<group>"; };
+		5B2E76C129B783825C08CB07 /* WishlistAndOnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistAndOnboardingTests.swift; sourceTree = "<group>"; };
 		5EA2D2B7F1488BBD7863340E /* OpportunityCostEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpportunityCostEngine.swift; sourceTree = "<group>"; };
 		612D9779C650DD9EA5AC5772 /* LoanAdjustmentEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanAdjustmentEngineTests.swift; sourceTree = "<group>"; };
 		6168CAFB5E98ACF255302976 /* Loan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loan.swift; sourceTree = "<group>"; };
@@ -176,6 +183,7 @@
 		92068B5742CA987B0D04B7A8 /* RiskAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiskAnalyzer.swift; sourceTree = "<group>"; };
 		95D44982D33A092A71735660 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9D678D728982461AE3C2F398 /* UpcomingPaymentsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpcomingPaymentsCard.swift; sourceTree = "<group>"; };
+		9D72C54D08923365F738B255 /* WishlistQuickAddSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistQuickAddSheet.swift; sourceTree = "<group>"; };
 		A12246B3066447E769BBE68B /* MultiGoalEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiGoalEngine.swift; sourceTree = "<group>"; };
 		A3FA3795F15896CB986517B1 /* OverviewTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewTab.swift; sourceTree = "<group>"; };
 		A6A618F039223FEFBAB11EC2 /* MoneyFlowUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MoneyFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -195,6 +203,7 @@
 		D955BF35DDA3E0668E845528 /* LoanAdjustmentEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanAdjustmentEvent.swift; sourceTree = "<group>"; };
 		DAC795D51963B5FD8D6A7980 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E0ECCE97A175472DCA3D7760 /* PersistenceRecoveryCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceRecoveryCoordinator.swift; sourceTree = "<group>"; };
+		E245F4B7C53C42247D82900E /* WishlistJarCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistJarCardView.swift; sourceTree = "<group>"; };
 		E39E077A521B371DEA7AAAD9 /* CashAccountForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccountForm.swift; sourceTree = "<group>"; };
 		E4985AFC5220BF1D46F19A58 /* WidgetSnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotService.swift; sourceTree = "<group>"; };
 		E542C06B27B73A9E8691AF61 /* CashFlowWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowWidget.swift; sourceTree = "<group>"; };
@@ -207,6 +216,7 @@
 		ECC571A50F746802EB286991 /* LoanDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanDetailView.swift; sourceTree = "<group>"; };
 		F1098F2D6CF3A5BA5C58BF4D /* LoanOCRParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoanOCRParserTests.swift; sourceTree = "<group>"; };
 		F40DFCDA1EAAABEBFCF8CD34 /* RepaymentCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepaymentCalculator.swift; sourceTree = "<group>"; };
+		F5C8AC0EC7A8FD9431C6BDA3 /* QuickOnboardingWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickOnboardingWizardView.swift; sourceTree = "<group>"; };
 		F950500787322C91030B3E7C /* CreditCardForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardForm.swift; sourceTree = "<group>"; };
 		FFBF7A09A50020B705870E57 /* DynamicCashFlowSandboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicCashFlowSandboxView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -233,6 +243,7 @@
 				433BA597170858C7976C91D0 /* OpportunityCostTests.swift */,
 				654CC8352F1BD78450FF6559 /* RepaymentCalculatorTests.swift */,
 				AD39E1F5B42CB3C33BFAD1A8 /* SafeToSpendEngineTests.swift */,
+				5B2E76C129B783825C08CB07 /* WishlistAndOnboardingTests.swift */,
 			);
 			path = MoneyFlowTests;
 			sourceTree = "<group>";
@@ -260,6 +271,8 @@
 				456944FB391763405C686F44 /* OpportunityCostCalculatorView.swift */,
 				A7CF0BE677BBFBF7CD1648AC /* PlanningTab.swift */,
 				2D7FD12B7BCCE9149CB2304A /* ReconciliationConfirmSheet.swift */,
+				E245F4B7C53C42247D82900E /* WishlistJarCardView.swift */,
+				9D72C54D08923365F738B255 /* WishlistQuickAddSheet.swift */,
 			);
 			path = Planning;
 			sourceTree = "<group>";
@@ -395,6 +408,7 @@
 				A7449381E34DC0BE137740A5 /* PlanningScenario.swift */,
 				306AA440F01A06ADE073408F /* UserSettings.swift */,
 				1AB807235D68FB28870A9493 /* WidgetSnapshotData.swift */,
+				124F03BB8BC96FC2E55AB676 /* WishlistTemplate.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -403,6 +417,7 @@
 			isa = PBXGroup;
 			children = (
 				2447FA27296BBC81934BCD36 /* OnboardingFlowView.swift */,
+				F5C8AC0EC7A8FD9431C6BDA3 /* QuickOnboardingWizardView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -596,6 +611,7 @@
 				79F1181298D55BF2F134B845 /* OpportunityCostTests.swift in Sources */,
 				52B9DE56A4E8F41FC69581F0 /* RepaymentCalculatorTests.swift in Sources */,
 				1BA8419108F1B9D95492F5D1 /* SafeToSpendEngineTests.swift in Sources */,
+				53B68657AC48E5B051C5095E /* WishlistAndOnboardingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -665,6 +681,7 @@
 				D682378A40E3A9FFCED6BD89 /* PlanningScenario.swift in Sources */,
 				52110F32AC3A4436CB189E59 /* PlanningTab.swift in Sources */,
 				13670A6342A7988760E7802B /* PrivacyBlurOverlayView.swift in Sources */,
+				3200D7723109207FE29A71E6 /* QuickOnboardingWizardView.swift in Sources */,
 				72470B9E603A4A85E7B076C9 /* ReconciliationConfirmSheet.swift in Sources */,
 				D3878900A377040A41E3629D /* RepaymentCalculator.swift in Sources */,
 				572C7B72750F71C86BAEF19F /* RiskAnalyzer.swift in Sources */,
@@ -676,6 +693,9 @@
 				B8F36E466F9D4EA8104693F1 /* UserSettings.swift in Sources */,
 				62C658262BAE168E339B930D /* WidgetSnapshotData.swift in Sources */,
 				04C67A274C55727CAEF28C25 /* WidgetSnapshotService.swift in Sources */,
+				F50858EF518DE03DAB9266BC /* WishlistJarCardView.swift in Sources */,
+				249B63AF781617CBDACD5952 /* WishlistQuickAddSheet.swift in Sources */,
+				7FD0B2E254DA8FADE97EE9C0 /* WishlistTemplate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

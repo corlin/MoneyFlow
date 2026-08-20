@@ -8,7 +8,17 @@ MoneyFlow 是一款使用 SwiftUI 与 SwiftData 构建的本地优先 iOS 专业
 
 ## 核心能力
 
-### 1. 今日安全可花与智能备款助手（Safe-to-Spend & Smart Buffer Advisor）- 素人友好升级
+### 1. 30秒极速新手向导与生活心愿罐（Quick Onboarding & Wishlist Jars）- 素人友好升级
+- **30秒极速账务体检（3-Step Instant Setup）**：
+  - 素人只需输入 3 个直觉数字：**手头活钱**（微信/支付宝/活期）、**每月到手收入** 与 **每月固定房贷/车贷/信用卡**；
+  - 一键秒级在本地 SwiftData 建立账务基础，直接生成专属「今日安全可花」与余钱晴雨表，零门槛上手。
+- **生活心愿罐（Wishlist Jars with Smart ETA）**：
+  - 预设生活化心愿模版（📱 换新手机 / ✈️ 年假旅行 / 🩺 父母体检 / 🧧 过年红包 / 🚗 买车换车 / 🛡️ 应急底气金），1 秒创建；
+  - **智能达成预测（Smart ETA）**：“按当前每月净存钱，预计今年 11 月达成 🎉”；
+  - **随时投币存钱**：支持在心愿罐上点击「存入 ¥200 / ¥500」，体验像真实存钱罐一样的持续正向反馈；
+  - **双 Tab 成就联动**：概览 Tab 首屏下方实时呈现「🌟 最快达成心愿」进度。
+
+### 2. 今日安全可花与智能备款助手（Safe-to-Spend & Smart Buffer Advisor）
 - **今日随心花（Daily Safe-to-Spend）**：
   - 核心公式：$\text{SafeSpend}_{\text{month}} = \max(0, \text{流动现金} + \text{待入账收入} - \text{本月待还房贷车贷信用卡} - \text{本月剩余生活底线} - \text{应急储备防线})$。
   - 单日平摊：将本月剩余自由闲钱智能平摊至剩余天数，每天打开 App 第一眼大字号展示 **「今日安全可花 ¥320 · 安心花 🟢」**，不用动脑算账即可放心消费。
@@ -19,7 +29,7 @@ MoneyFlow 是一款使用 SwiftUI 与 SwiftData 构建的本地优先 iOS 专业
 - **全域金融黑话人话翻译**：
   - 告别晦涩专业缩写：`DSR` $\rightarrow$ **「还贷压力：轻松 🟢」**，`应急月数` $\rightarrow$ **「家庭抗风险底气：充足 🛡️」**，`BEP` $\rightarrow$ **「大白话理财 vs 还贷收益对比建议」**。
 
-### 2. 提前还贷 vs 稳健理财五维机会成本精算器（Opportunity Cost Engine）
+### 3. 提前还贷 vs 稳健理财五维机会成本精算器（Opportunity Cost Engine）
 - **五维全景精算**：
   - **贷款省息精算**：精确计算提前还本（缩短年限 / 减少月供）在剩余期限内节省的累计总利息 $\Delta I_{loan}$。
   - **理财复利回报对标**：在相同对标周期 $M$ 内，计算闲钱本金 $P$ 以预期年化收益率 $r_{inv}$ 产生的按月复利终值 $P(1 + r_{inv}/12)^M - P$。
@@ -158,7 +168,7 @@ xcodebuild test \
   -only-testing:MoneyFlowTests
 ```
 
-测试套件共 **40 项单元测试**，覆盖：
+测试套件共 **46 项单元测试**，覆盖：
 - 周期性现金流日历发薪注入、逐日水位递推与流动性缺口预警 (`CashFlowCalendarTests`)
 - 工资收入实发对账、税后/绩效微调与银行卡存款联动 (`testSalaryReconciliationAndAccountDepositSync`)
 - 贷款与信用卡还款日出账映射、对账记录状态流转与自定义收支事件
@@ -186,7 +196,7 @@ MoneyFlow/
 ├── Services/             # 核心计算引擎（Safe-to-Spend、CFP、OCR、对账）
 ├── Views/                # SwiftUI 界面
 ├── MoneyFlowWidgets/     # WidgetKit 桌面与锁屏小组件扩展
-└── MoneyFlowTests/       # 43 项单元测试矩阵
+└── MoneyFlowTests/       # 46 项单元测试矩阵
 
 ---
 

@@ -21,6 +21,7 @@ struct OverviewTab: View {
     }
 
     @State private var settingsToEdit: UserSettings?
+    @State private var showingQuickWizard = false
     @State private var showingAddChooser = false
     @State private var showingAddAssetSheet = false
     @State private var showingAddLoanSheet = false
@@ -39,6 +40,12 @@ struct OverviewTab: View {
     private var emergencyTargetMonths: Int { settings?.emergencyFundMonthsTarget ?? 3 }
     private var totalCash: Double { accounts.reduce(0) { $0 + $1.balance } }
     private var hasAnyData: Bool { !accounts.isEmpty || !loans.isEmpty || !creditCards.isEmpty || !goals.isEmpty }
+
+    // 最快达成的心愿
+    private var nearestGoal: FinancialGoal? {
+        let active = goals.filter { $0.targetAmount > 0 }
+        return active.sorted { ($0.currentEarmarkedAmount / $0.targetAmount) > ($1.currentEarmarkedAmount / $1.targetAmount) }.first
+    }
 
     private var safeToSpendResult: SafeToSpendResult {
         SafeToSpendEngine.calculate(
@@ -114,14 +121,16 @@ struct OverviewTab: View {
                 }
             }
             .confirmationDialog("添加第一笔数据", isPresented: $showingAddChooser, titleVisibility: .visible) {
+                Button("🚀 30秒极速账务体检", systemImage: "wand.and.sparkles") { showingQuickWizard = true }
                 Button("添加资产", systemImage: "banknote") { showingAddAssetSheet = true }
                 Button("添加贷款", systemImage: "house") { showingAddLoanSheet = true }
                 Button("添加信用卡", systemImage: "creditcard") { showingAddCreditCardSheet = true }
-                Button("添加规划目标", systemImage: "target") { showingAddGoalSheet = true }
+                Button("添加生活心愿罐", systemImage: "gift.fill") { showingAddGoalSheet = true }
                 Button("取消", role: .cancel) {}
             } message: {
                 Text("选择最方便的一项开始，其余内容以后随时可以补充。")
             }
+            .sheet(isPresented: $showingQuickWizard) { QuickOnboardingWizardView() }
             .sheet(item: $settingsToEdit) { SettingsView(settings: $0) }
             .sheet(isPresented: $showingAddAssetSheet) { CashAccountForm() }
             .sheet(isPresented: $showingAddLoanSheet) { LoanForm() }
@@ -156,6 +165,11 @@ struct OverviewTab: View {
             // 模块 0: 今日安全随心花与备款助手 (Safe-to-Spend Hero Card)
             SafeToSpendHeroCard(result: safeToSpendResult)
 
+            // 模块 0.5: 近期最快达成生活心愿卡片
+            if let goal = nearestGoal {
+                wishlistMiniCard(goal: goal)
+            }
+
             // 模块 1: 财务韧性与健康中枢 (整合生命线指标、黄金建议与净现金头寸)
             FinancialResilienceHubView(analysis: debtAnalysis) {
                 if let onExplorePlanning {
@@ -178,18 +192,76 @@ struct OverviewTab: View {
         .padding()
     }
 
+    private func wishlistMiniCard(goal: FinancialGoal) -> some View {
+        let ratio = goal.targetAmount > 0 ? min(1.0, goal.currentEarmarkedAmount / goal.targetAmount) : 0
+        let isDone = goal.currentEarmarkedAmount >= goal.targetAmount
+
+        return Button {
+            if let onExplorePlanning {
+                onExplorePlanning()
+            } else if let selectedTab {
+                AppMotion.perform(level: .spatial, reduceMotion: reduceMotion) {
+                    selectedTab.wrappedValue = 1
+                }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.orange.opacity(0.12))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: isDone ? "checkmark.seal.fill" : "sparkles")
+                        .font(.subheadline)
+                        .foregroundStyle(isDone ? Color.green : Color.orange)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text("🌟 近期心愿：\(goal.name)")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.primary)
+
+                        Text("\(Int(ratio * 100))%")
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.12), in: Capsule())
+                            .foregroundStyle(Color.orange)
+                    }
+
+                    Text(isDone ? "🎉 已达成目标！点击查看" : "已攒 ¥\(Int(goal.currentEarmarkedAmount)) / 目标 ¥\(Int(goal.targetAmount))")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(12)
+            .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(Color(UIColor.separator).opacity(0.12), lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
     private var onboarding: some View {
         VStack(spacing: 18) {
-            Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 42, weight: .semibold))
+            Image(systemName: "wand.and.sparkles")
+                .font(.system(size: 44, weight: .semibold))
                 .foregroundStyle(Color.appPrimary)
                 .symbolRenderingMode(.hierarchical)
                 .accessibilityHidden(true)
 
             VStack(spacing: 8) {
-                Text("看清未来还款压力与目标达成")
+                Text("看清每天能花多少钱")
                     .font(.title2.bold())
-                Text("引入 CFA/CFP 专业视角：记录资产、负债或规划目标，实时获得现金流推演与智能行动建议。")
+                Text("只需 30 秒填写大概数字，即可一眼看清今日安全可花额度、房贷压力与生活存钱进度。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -197,9 +269,21 @@ struct OverviewTab: View {
 
             VStack(spacing: 12) {
                 Button {
+                    showingQuickWizard = true
+                } label: {
+                    Label("🚀 30秒极速账务体检", systemImage: "sparkles")
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.97, pressedOpacity: 0.85))
+                .controlSize(.large)
+                .tint(Color.appPrimary)
+
+                Button {
                     showingAddChooser = true
                 } label: {
-                    Label("添加第一笔数据", systemImage: "plus")
+                    Label("手动添加第一笔数据", systemImage: "plus")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
@@ -208,13 +292,13 @@ struct OverviewTab: View {
                 .controlSize(.large)
 
                 Button(action: loadDemoData) {
-                    Label("载入示例体验", systemImage: "wand.and.stars")
+                    Label("载入示例体验", systemImage: "gift")
                 }
                 .buttonStyle(AppSpringButtonStyle(scaleAmount: 0.97, pressedOpacity: 0.85))
                 .controlSize(.large)
             }
 
-            Label("数据仅保存在这台设备上", systemImage: "lock.fill")
+            Label("数据仅保存在这台设备上 · 100% 离线隐私", systemImage: "lock.fill")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }

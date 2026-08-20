@@ -8,7 +8,8 @@ struct GoalListView: View {
     let activeLoans: [Loan]
     var estimatedMonthlyMustPay: Double = 5000
 
-    @State private var showingAddSheet = false
+    @State private var showingQuickAddSheet = false
+    @State private var showingFullAddSheet = false
     @State private var editingGoal: FinancialGoal? = nil
 
     var body: some View {
@@ -16,11 +17,11 @@ struct GoalListView: View {
             // 模块头部
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("🌟 我的心愿与储蓄目标")
+                    Text("🌟 我的生活心愿罐")
                         .font(.headline)
                         .foregroundStyle(.primary)
 
-                    Text("每月结余资金将按优先级自动分配至各心愿")
+                    Text("每月自由余钱自动累积，还可随时向罐中存钱")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -28,9 +29,9 @@ struct GoalListView: View {
                 Spacer()
 
                 Button {
-                    showingAddSheet = true
+                    showingQuickAddSheet = true
                 } label: {
-                    Label("添加心愿", systemImage: "plus.circle.fill")
+                    Label("新建心愿", systemImage: "plus.circle.fill")
                         .font(.subheadline.weight(.semibold))
                 }
             }
@@ -53,16 +54,21 @@ struct GoalListView: View {
             } else {
                 VStack(spacing: 12) {
                     ForEach(summary.goalProjections) { item in
-                        GoalCardView(
-                            item: item,
-                            onEdit: { editingGoal = item.goal },
-                            onDelete: { deleteGoal(item.goal) }
+                        WishlistJarCardView(
+                            goal: item.goal,
+                            monthlySurplus: item.projectedIrrigation > 0 ? (item.projectedIrrigation / 12.0) : 500,
+                            onEdit: { editingGoal = item.goal }
                         )
                     }
                 }
             }
         }
-        .sheet(isPresented: $showingAddSheet) {
+        .sheet(isPresented: $showingQuickAddSheet) {
+            WishlistQuickAddSheet {
+                showingFullAddSheet = true
+            }
+        }
+        .sheet(isPresented: $showingFullAddSheet) {
             GoalFormSheet(
                 goalToEdit: nil,
                 totalCash: totalCash,
@@ -84,28 +90,28 @@ struct GoalListView: View {
 
     private var emptyStateView: some View {
         VStack(spacing: 12) {
-            Image(systemName: "target")
+            Image(systemName: "wand.and.sparkles")
                 .font(.system(size: 36))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appPrimary)
                 .padding(.top, 8)
 
-            Text("尚未设定规划目标")
+            Text("设立您的第一个生活心愿罐")
                 .font(.headline)
 
-            Text("引入 CFP 目标导向规划：设定「应急防线」、「提前还贷」或「置业购车」心愿，系统将自动利用月度结余推演达成时间。")
+            Text("无论是换新手机、年假旅行，还是为父母预约体检，建立心愿罐后系统将自动推演达成月份，让存钱充满动力！")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16)
 
             Button {
-                showingAddSheet = true
+                showingQuickAddSheet = true
             } label: {
-                Text("设定第一个规划目标")
+                Text("选个心愿模版开始 📱✈️")
                     .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.accentColor, in: Capsule())
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 9)
+                    .background(Color.appPrimary, in: Capsule())
                     .foregroundStyle(.white)
             }
             .padding(.bottom, 8)
